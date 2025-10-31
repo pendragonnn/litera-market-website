@@ -7,9 +7,13 @@ use App\Models\Book;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $books = Book::latest()->take(10)->get(); // contoh aja
+        $query = Book::query();
+        if ($request->filled('q')) {
+            $query->where('title', 'like', '%' . $request->q . '%');
+        }
+        $books = $query->with('category')->latest()->get();
         return view('home', compact('books'));
     }
 }
