@@ -7,8 +7,8 @@
 
         {{-- Center Menu --}}
         <div class="hidden md:flex space-x-8">
-            <a href="#collection" class="text-gray-700 font-semibold hover:text-[#1B3C53]">Our Collection</a>
-            <a href="#tentang" class="text-gray-700 font-semibold hover:text-[#1B3C53]">About Us</a>
+            <a href="#ourCollection" class="text-gray-700 font-semibold hover:text-[#1B3C53]">Our Collection</a>
+            <a href="#aboutUs" class="text-gray-700 font-semibold hover:text-[#1B3C53]">About Us</a>
             <a href="#order" class="text-gray-700 font-semibold hover:text-[#1B3C53]">How to Order</a>
         </div>
 
@@ -87,8 +87,8 @@
     {{-- Mobile Menu --}}
     <div :class="{'block': open, 'hidden': ! open}" class="md:hidden border-t border-gray-200">
         <div class="px-4 pt-3 pb-4 space-y-2">
-            <a href="#collection" class="block text-gray-700 font-semibold hover:text-[#1B3C53]">Our Collection</a>
-            <a href="#tentang" class="block text-gray-700 font-semibold hover:text-[#1B3C53]">About Us</a>
+            <a href="#ourCollection" class="block text-gray-700 font-semibold hover:text-[#1B3C53]">Our Collection</a>
+            <a href="#aboutUs" class="block text-gray-700 font-semibold hover:text-[#1B3C53]">About Us</a>
             <a href="#order" class="block text-gray-700 font-semibold hover:text-[#1B3C53]">How to Order</a>
 
             <hr class="border-gray-300">
