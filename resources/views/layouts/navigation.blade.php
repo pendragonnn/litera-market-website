@@ -15,15 +15,17 @@
         {{-- Right Section --}}
         <div class="hidden md:flex items-center gap-4">
             {{-- Dropdown Kategori --}}
-            <div>
-                <select id="filterKategori"
+            <form method="GET" action="{{ route('home') }}">
+                <select name="category" id="filterKategori" onchange="this.form.submit()"
                     class="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#d2c1b6]">
-                    <option value="semua">Category</option>
-                    <option value="fiksi">Fiksi</option>
-                    <option value="nonfiksi">Non-Fiksi</option>
-                    <option value="komik">Komik</option>
+                    <option value="all" {{ request('category') == 'all' ? 'selected' : '' }}>All Categories</option>
+                    @foreach ($categories as $category)
+                        <option value="{{ $category->name }}" {{ request('category') == $category->name ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
                 </select>
-            </div>
+            </form>
 
             {{-- Ikon Keranjang --}}
             <a href="{{ Route::has('cart.index') ? route('cart.index') : '#' }}"
@@ -86,13 +88,31 @@
 
     {{-- Mobile Menu --}}
     <div :class="{'block': open, 'hidden': ! open}" class="md:hidden border-t border-gray-200">
-        <div class="px-4 pt-3 pb-4 space-y-2">
+        <div class="px-4 pt-3 pb-4 space-y-3">
+            {{-- Navigasi utama --}}
             <a href="#ourCollection" class="block text-gray-700 font-semibold hover:text-[#1B3C53]">Our Collection</a>
             <a href="#aboutUs" class="block text-gray-700 font-semibold hover:text-[#1B3C53]">About Us</a>
             <a href="#order" class="block text-gray-700 font-semibold hover:text-[#1B3C53]">How to Order</a>
 
+            {{-- 🔽 Dropdown Kategori (Mobile) --}}
+            <form method="GET" action="{{ route('home') }}" class="mt-2">
+                <label for="filterKategoriMobile" class="block text-sm font-semibold text-gray-700 mb-1">
+                    Category
+                </label>
+                <select name="category" id="filterKategoriMobile" onchange="this.form.submit()"
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#d2c1b6]">
+                    <option value="all" {{ request('category') == 'all' ? 'selected' : '' }}>All Categories</option>
+                    @foreach ($categories as $category)
+                        <option value="{{ $category->name }}" {{ request('category') == $category->name ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
+
             <hr class="border-gray-300">
 
+            {{-- Tombol Auth --}}
             @guest
                 <button onclick="toggleModal('loginModal')"
                     class="w-full text-left text-gray-700 border border-gray-300 rounded-md px-3 py-2 hover:bg-gray-100">
