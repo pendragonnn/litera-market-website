@@ -30,6 +30,8 @@
             <!-- Page Content -->
             <main>
                 @yield('content')
+                @stack('scripts')
+                @yield('modals')
             </main>
         </div>
     </body>

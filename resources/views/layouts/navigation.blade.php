@@ -25,12 +25,18 @@
                 {{-- ✅ Tampilkan tombol login/register untuk guest --}}
                 @guest
                     <div class="flex items-center space-x-4">
-                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-blue-600 text-sm font-medium">
-                            Login
-                        </a>
-                        <a href="{{ route('register') }}" class="text-gray-600 hover:text-blue-600 text-sm font-medium">
-                            Register
-                        </a>
+                        @guest
+                            <div class="flex items-center space-x-4">
+                                <button onclick="toggleModal('loginModal')"
+                                    class="text-gray-600 hover:text-blue-600 text-sm font-medium">
+                                    Login
+                                </button>
+                                <button onclick="toggleModal('registerModal')"
+                                    class="text-gray-600 hover:text-blue-600 text-sm font-medium">
+                                    Register
+                                </button>
+                            </div>
+                        @endguest
                     </div>
                 @endguest
 
@@ -61,7 +67,7 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
-                                        this.closest('form').submit();">
+                                                this.closest('form').submit();">
                                     {{ __('Log Out') }}
                                 </x-dropdown-link>
                             </form>
@@ -109,7 +115,7 @@
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault();
-                                                this.closest('form').submit();">
+                                                        this.closest('form').submit();">
                             {{ __('Log Out') }}
                         </x-responsive-nav-link>
                     </form>
@@ -119,12 +125,14 @@
 
         @guest
             <div class="pt-2 pb-3 border-t border-gray-200">
-                <x-responsive-nav-link :href="route('login')">
-                    {{ __('Login') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('register')">
-                    {{ __('Register') }}
-                </x-responsive-nav-link>
+                <button onclick="toggleModal('loginModal')"
+                    class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    Login
+                </button>
+                <button onclick="toggleModal('registerModal')"
+                    class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    Register
+                </button>
             </div>
         @endguest
     </div>
