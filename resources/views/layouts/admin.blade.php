@@ -32,7 +32,10 @@
           Categories
         </a>
         <a href="#" class="block px-4 py-2 rounded-md hover:bg-[#163246]">Transactions</a>
-        <a href="#" class="block px-4 py-2 rounded-md hover:bg-[#163246]">Users</a>
+        <a href="{{ route('admin.users.index') }}"
+          class="block px-4 py-2 rounded-md hover:bg-[#163246] {{ request()->routeIs('admin.users.*') ? 'bg-[#163246]' : '' }}">
+          Users
+        </a>
         <a href="#" class="block px-4 py-2 rounded-md hover:bg-[#163246]">Messages & Comments</a>
         <a href="#" class="block px-4 py-2 rounded-md hover:bg-[#163246]">Settings</a>
       </nav>

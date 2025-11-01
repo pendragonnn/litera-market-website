@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\BookController;
@@ -46,6 +47,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // CRUD Categories 
     Route::resource('/categories', CategoryController::class);
+
+    // CRUD Users
+    Route::resource('/users', UserController::class);
 });
 
 require __DIR__ . '/auth.php';
