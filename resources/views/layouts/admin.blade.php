@@ -27,7 +27,7 @@
           class="block px-4 py-2 rounded-md hover:bg-[#163246] {{ request()->routeIs('admin.books.*') ? 'bg-[#163246]' : '' }}">
           Books
         </a>
-        <a href="#"
+        <a href="{{ route('admin.categories.index') }}"
           class="block px-4 py-2 rounded-md hover:bg-[#163246] {{ request()->routeIs('admin.categories.*') ? 'bg-[#163246]' : '' }}">
           Categories
         </a>

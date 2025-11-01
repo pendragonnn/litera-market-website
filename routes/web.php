@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\BookController;
@@ -42,6 +43,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // CRUD Buku
     Route::resource('/books', BookController::class);
+
+    // CRUD Categories 
+    Route::resource('/categories', CategoryController::class);
 });
 
 require __DIR__ . '/auth.php';
