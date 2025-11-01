@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel | LiteraMarket</title>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.css" />
 </head>
 
 <body class="bg-gray-50 text-gray-800">
@@ -21,7 +23,7 @@
           class="block px-4 py-2 rounded-md hover:bg-[#163246] {{ request()->routeIs('admin.dashboard') ? 'bg-[#163246]' : '' }}">
           Dashboard
         </a>
-        <a href="#"
+        <a href="{{ route('admin.books.index') }}"
           class="block px-4 py-2 rounded-md hover:bg-[#163246] {{ request()->routeIs('admin.books.*') ? 'bg-[#163246]' : '' }}">
           Data Buku
         </a>
@@ -60,7 +62,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-9.33-5.014A6.001 6.001 0 006 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
-            <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+            <span
+              class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
           </button>
 
           {{-- Profile Dropdown --}}
@@ -76,8 +79,7 @@
                 {{ Auth::user()->name }}
                 <svg class="ml-1 w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 9l-7 7-7-7" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
             </x-slot>
@@ -102,5 +104,9 @@
       </main>
     </div>
   </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
+  @stack('scripts')
 </body>
+
 </html>
