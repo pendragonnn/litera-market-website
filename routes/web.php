@@ -68,7 +68,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // === USER ROUTES ===
-Route::middleware(['auth', 'role:user'])->prefix('user')->name('user.')->group(function () {
+Route::middleware(['auth', 'role:customer'])->prefix('user')->name('user.')->group(function () {
     // Cart Management
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/{book}', [CartController::class, 'store'])->name('cart.store');
