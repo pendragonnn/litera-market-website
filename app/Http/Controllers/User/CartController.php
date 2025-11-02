@@ -19,7 +19,6 @@ class CartController extends Controller
             ->where('user_id', Auth::id())
             ->get();
 
-        // Hitung total harga semua item di cart
         $totalPrice = $cartItems->sum(fn($item) => $item->book->price * $item->quantity);
 
         return view('user.cart.index', compact('cartItems', 'totalPrice'));
@@ -42,7 +41,8 @@ class CartController extends Controller
         $cartItem->quantity += $request->quantity;
         $cartItem->save();
 
-        return redirect()->route('user.cart.index')->with('success', 'Book added to cart!');
+        return redirect()->route('user.cart.index')
+            ->with('success', 'Book added to cart!');
     }
 
     /**
@@ -58,11 +58,12 @@ class CartController extends Controller
 
         $cartItem->update($validated);
 
-        return redirect()->route('user.cart.index')->with('success', 'Cart updated successfully.');
+        return redirect()->route('user.cart.index')
+            ->with('success', 'Cart updated successfully.');
     }
 
     /**
-     * Remove an item from the cart.
+     * Remove a single item from the user's cart.
      */
     public function destroy(CartItem $cartItem)
     {
@@ -70,11 +71,23 @@ class CartController extends Controller
 
         $cartItem->delete();
 
-        return redirect()->route('user.cart.index')->with('success', 'Item removed from cart.');
+        return redirect()->route('user.cart.index')
+            ->with('success', 'Item removed from cart.');
     }
 
     /**
-     * Helper to make sure users only modify their own cart.
+     * Clear all items in the user's cart.
+     */
+    public function clear()
+    {
+        CartItem::where('user_id', Auth::id())->delete();
+
+        return redirect()->route('user.cart.index')
+            ->with('success', 'Your cart has been cleared.');
+    }
+
+    /**
+     * Authorize that the cart item belongs to the authenticated user.
      */
     protected function authorizeCartItem(CartItem $cartItem)
     {
