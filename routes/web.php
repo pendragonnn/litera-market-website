@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
@@ -60,6 +61,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         ->name('orders.confirm');
     Route::post('/orders/{order}/reject', [\App\Http\Controllers\Admin\OrderController::class, 'reject'])
         ->name('orders.reject');
+
+    // Reviews Monitoring
+    Route::resource('/reviews', ReviewController::class)->only(['index', 'show']);
 });
 
 require __DIR__ . '/auth.php';

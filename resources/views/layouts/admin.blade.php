@@ -39,7 +39,10 @@
           class="block px-4 py-2 rounded-md hover:bg-[#163246] {{ request()->routeIs('admin.users.*') ? 'bg-[#163246]' : '' }}">
           Users
         </a>
-        <a href="#" class="block px-4 py-2 rounded-md hover:bg-[#163246]">Messages & Comments</a>
+        <a href="{{ route('admin.reviews.index') }}"
+          class="block px-4 py-2 rounded-md hover:bg-[#163246] {{ request()->routeIs('admin.reviews.*') ? 'bg-[#163246]' : '' }}">
+          Messages & Comments
+        </a>
         <a href="#" class="block px-4 py-2 rounded-md hover:bg-[#163246]">Settings</a>
       </nav>
 
