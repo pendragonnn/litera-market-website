@@ -3,9 +3,10 @@
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\BookController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\Admin\BookController;
+use App\Http\Controllers\User\CartController;
 use Illuminate\Support\Facades\Route;
 
 // === Public Route ===
@@ -43,7 +44,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         return view('admin.dashboard');
     })->name('dashboard');
 
-    // CRUD Buku
+    // CRUD Books
     Route::resource('/books', BookController::class);
 
     // CRUD Categories 
@@ -56,7 +57,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('/orders', \App\Http\Controllers\Admin\OrderController::class)
         ->only(['index', 'show']);
 
-    // Custom Actions
+    // Custom Order Actions
     Route::post('/orders/{order}/confirm', [\App\Http\Controllers\Admin\OrderController::class, 'confirm'])
         ->name('orders.confirm');
     Route::post('/orders/{order}/reject', [\App\Http\Controllers\Admin\OrderController::class, 'reject'])
@@ -64,6 +65,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Reviews Monitoring
     Route::resource('/reviews', ReviewController::class)->only(['index', 'show']);
+});
+
+// === USER ROUTES ===
+Route::middleware(['auth', 'role:customer'])->prefix('user')->name('user.')->group(function () {
+    // Cart Management
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/{book}', [CartController::class, 'store'])->name('cart.store');
+    Route::put('/cart/{cartItem}', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/{cartItem}', [CartController::class, 'destroy'])->name('cart.destroy');
+    Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
 });
 
 require __DIR__ . '/auth.php';
