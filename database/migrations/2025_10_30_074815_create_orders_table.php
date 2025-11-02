@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->string('phone', 20)->nullable();
             $table->text('address');
             $table->decimal('total_price', 10, 2);
-            $table->enum('status', ['Pending', 'Processed', 'Shipped', 'Delivered'])->default('Pending');
+            $table->enum('status', ['Pending', 'Processed', 'Shipped', 'Delivered', 'Cancelled'])->default('Pending');
             $table->timestamps();
             $table->softDeletes();
         });
