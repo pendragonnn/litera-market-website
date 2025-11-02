@@ -31,7 +31,10 @@
           class="block px-4 py-2 rounded-md hover:bg-[#163246] {{ request()->routeIs('admin.categories.*') ? 'bg-[#163246]' : '' }}">
           Categories
         </a>
-        <a href="#" class="block px-4 py-2 rounded-md hover:bg-[#163246]">Transactions</a>
+        <a href="{{ route('admin.orders.index') }}"
+          class="block px-4 py-2 rounded-md hover:bg-[#163246] {{ request()->routeIs('admin.orders.*') ? 'bg-[#163246]' : '' }}">
+          Orders
+        </a>
         <a href="{{ route('admin.users.index') }}"
           class="block px-4 py-2 rounded-md hover:bg-[#163246] {{ request()->routeIs('admin.users.*') ? 'bg-[#163246]' : '' }}">
           Users

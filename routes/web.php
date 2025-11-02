@@ -50,6 +50,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // CRUD Users
     Route::resource('/users', UserController::class);
+
+    // Orders
+    Route::resource('/orders', \App\Http\Controllers\Admin\OrderController::class)
+        ->only(['index', 'show']);
+
+    // Custom Actions
+    Route::post('/orders/{order}/confirm', [\App\Http\Controllers\Admin\OrderController::class, 'confirm'])
+        ->name('orders.confirm');
+    Route::post('/orders/{order}/reject', [\App\Http\Controllers\Admin\OrderController::class, 'reject'])
+        ->name('orders.reject');
 });
 
 require __DIR__ . '/auth.php';
