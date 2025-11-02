@@ -20,10 +20,10 @@
       @foreach ($cartItems as $item)
         <div class="bg-gray-50 border border-gray-300 rounded-md p-3 shadow-sm hover:shadow-md transition">
           <img src="{{ $item->book->image 
-            ? asset('storage/' . $item->book->image) 
+            ? asset($item->book->image) 
             : 'https://placehold.co/200x250?text=No+Image' }}" 
             alt="{{ $item->book->title }}" 
-            class="w-full h-48 object-cover rounded-md border mb-3">
+            class="w-full h-[450px] object-cover rounded-md border mb-3">
 
           <h3 class="text-[#1B3C53] font-semibold text-lg truncate">{{ $item->book->title }}</h3>
           <p class="text-gray-600 text-sm mb-2">Rp {{ number_format($item->book->price, 0, ',', '.') }}</p>
@@ -41,14 +41,11 @@
           </form>
 
           {{-- Delete button --}}
-          <form action="{{ route('user.cart.destroy', $item) }}" method="POST" onsubmit="return confirm('Remove this book from your cart?');">
-            @csrf
-            @method('DELETE')
-            <button type="submit"
-              class="w-full mt-1 px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition">
-              Delete
-            </button>
-          </form>
+          <button type="button"
+            class="w-full mt-1 px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
+            onclick="openDeleteModal('{{ route('user.cart.destroy', $item) }}', '{{ $item->book->title }}')">
+            Delete
+          </button>
         </div>
       @endforeach
     </div>
@@ -61,14 +58,11 @@
 
       <div class="flex items-center gap-3">
         {{-- Clear Cart --}}
-        <form action="{{ route('user.cart.clear') }}" method="POST" onsubmit="return confirm('Are you sure you want to clear your entire cart?');">
-          @csrf
-          @method('DELETE')
-          <button type="submit" 
-            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm font-medium">
-            Clear Cart
-          </button>
-        </form>
+        <button type="button"
+          class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm font-medium"
+          onclick="openClearModal('{{ route('user.cart.clear') }}')">
+          Clear Cart
+        </button>
 
         {{-- Checkout --}}
         <a href="#" 
@@ -79,4 +73,87 @@
     </div>
   @endif
 </div>
+
+{{-- === Delete Confirmation Modal === --}}
+<div id="deleteModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+  <div class="bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-xl shadow-xl w-[90%] max-w-md animate-fadeIn">
+    <div class="border-b border-[#d2c1b6]/60 px-4 py-3 flex justify-between items-center">
+      <h2 class="font-semibold text-[#1B3C53]">LiteraMarket</h2>
+      <button onclick="closeModal('deleteModal')" class="text-[#1B3C53]/60 hover:text-[#1B3C53]">✕</button>
+    </div>
+    <div class="px-5 py-4 text-center">
+      <p class="text-[#1B3C53] mb-5 text-sm">Are you sure you want to remove <span id="deleteItemName" class="font-semibold"></span> from your cart?</p>
+      <form id="deleteForm" method="POST">
+        @csrf
+        @method('DELETE')
+        <div class="flex justify-center gap-3">
+          <button type="button" onclick="closeModal('deleteModal')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm font-medium">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{{-- === Clear Cart Confirmation Modal === --}}
+<div id="clearModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+  <div class="bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-xl shadow-xl w-[90%] max-w-md animate-fadeIn">
+    <div class="border-b border-[#d2c1b6]/60 px-4 py-3 flex justify-between items-center">
+      <h2 class="font-semibold text-[#1B3C53]">LiteraMarket</h2>
+      <button onclick="closeModal('clearModal')" class="text-[#1B3C53]/60 hover:text-[#1B3C53]">✕</button>
+    </div>
+    <div class="px-5 py-4 text-center">
+      <p class="text-[#1B3C53] mb-5 text-sm">Are you sure you want to clear your entire cart?</p>
+      <form id="clearForm" method="POST">
+        @csrf
+        @method('DELETE')
+        <div class="flex justify-center gap-3">
+          <button type="button" onclick="closeModal('clearModal')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm font-medium">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">Clear</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 @endsection
+
+@push('scripts')
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.25s ease-in-out;
+  }
+</style>
+
+<script>
+  function openDeleteModal(actionUrl, itemName) {
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    const name = document.getElementById('deleteItemName');
+
+    form.action = actionUrl;
+    name.textContent = `"${itemName}"`;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function openClearModal(actionUrl) {
+    const modal = document.getElementById('clearModal');
+    const form = document.getElementById('clearForm');
+
+    form.action = actionUrl;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeModal(id) {
+    const modal = document.getElementById(id);
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+</script>
+@endpush
