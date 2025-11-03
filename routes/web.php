@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\User\CartController;
 use App\Http\Controllers\User\CheckoutController;
+use App\Http\Controllers\User\MyOrdersController;
 use Illuminate\Support\Facades\Route;
 
 // === Public Route ===
@@ -80,6 +81,12 @@ Route::middleware(['auth', 'role:customer'])->prefix('user')->name('user.')->gro
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+
+    // My Orders
+    Route::get('/orders', [MyOrdersController::class, 'index'])->name('user.orders.index');
+    Route::patch('/orders/{order}/cancel', [MyOrdersController::class, 'cancel'])->name('orders.cancel');
+    Route::patch('/orders/{order}/complete', [MyOrdersController::class, 'complete'])->name('orders.complete');
+    Route::post('/orders/{order}/upload-proof', [MyOrdersController::class, 'storeProof'])->name('orders.store-proof');
 });
 
 require __DIR__ . '/auth.php';
