@@ -59,7 +59,7 @@
               <a href="{{ route('admin.orders.show', $order) }}"
                  class="px-3 py-1 bg-[#1B3C53] text-white rounded-md text-xs hover:bg-[#102a3e]">View</a>
 
-              @if ($order->status === 'Pending' && $order->payment->payment_status === "Awaiting Approval")
+              @if ($order->status === 'Processed' && $order->payment->payment_status === "Awaiting Approval")
                 <form action="{{ route('admin.orders.confirm', $order) }}" method="POST">
                   @csrf
                   <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded-md text-xs hover:bg-green-700">
