@@ -20,9 +20,13 @@
           <div class="flex justify-between items-center mt-3">
             <div class="flex gap-1">
               {{-- Detail Button --}}
-              <a href="#" class="bg-[#002D72] text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-[#001E4D]">
+              <button class="bg-[#002D72] text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-[#001E4D]"
+                data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-author="{{ $book->author }}"
+                data-description="{{ $book->description }}"
+                data-price="{{ number_format($book->price ?? 0, 0, ',', '.') }}" data-stock="{{ $book->stock }}"
+                data-image="{{ $book->image ?? asset('images/default-book.jpg') }}" onclick="openBookModal(this)">
                 Detail
-              </a>
+              </button>
 
               {{-- Add to Cart Button --}}
               <button
@@ -67,6 +71,56 @@
     </div>
   </div>
 </div>
+
+{{-- === Book Detail Modal === --}}
+<div id="bookModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+  <div
+    class="bg-white rounded-xl shadow-2xl w-[90%] max-w-3xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300"
+    id="bookModalBox">
+
+    {{-- Header --}}
+    <div class="flex justify-between items-center border-b border-gray-200 px-6 py-4 bg-[#F9F3EF]">
+      <h2 class="text-lg font-semibold text-[#1B3C53]" id="modalBookTitle">Book Title</h2>
+      <button onclick="closeBookModal()" class="text-[#1B3C53]/70 hover:text-[#1B3C53] text-lg font-bold">✕</button>
+    </div>
+
+    {{-- Content --}}
+    <div class="grid md:grid-cols-2 gap-6 p-6 items-center">
+      {{-- Image --}}
+      <div class="flex justify-center">
+        <img id="modalBookImage" src="{{ asset('images/default-book.jpg') }}" alt="Book Image"
+          class="h-64 object-contain rounded-md">
+      </div>
+
+      {{-- Info --}}
+      <div>
+        <h3 class="font-bold text-[#1B3C53] text-xl mb-1" id="modalBookTitleText">Book Title</h3>
+        <p class="text-gray-600 text-sm mb-3" id="modalBookAuthor">Author Name</p>
+
+        <p class="text-sm text-gray-700 mb-4" id="modalBookDescription">
+          Description of the book goes here.
+        </p>
+
+        <p class="font-semibold text-[#C0392B] mb-2">
+          Rp <span id="modalBookPrice">0</span>
+        </p>
+
+        <p class="text-sm text-gray-500 mb-4">
+          Stock: <span id="modalBookStock">0</span>
+        </p>
+
+        {{-- Action --}}
+        <div class="flex gap-3">
+          <button id="modalAddToCart"
+            class="bg-[#1B3C53] text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-[#102a3e] transition">
+            🛒 Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 @push('scripts')
   <script>
@@ -169,6 +223,54 @@
           addToCart(bookId, bookTitle, this);
         });
       });
+    });
+    function openBookModal(button) {
+      const modal = document.getElementById('bookModal');
+      const modalBox = document.getElementById('bookModalBox');
+
+      // Ambil data dari tombol
+      document.getElementById('modalBookTitle').textContent = button.dataset.title;
+      document.getElementById('modalBookTitleText').textContent = button.dataset.title;
+      document.getElementById('modalBookAuthor').textContent = button.dataset.author || 'Unknown Author';
+      document.getElementById('modalBookDescription').textContent = button.dataset.description || 'No description available.';
+      document.getElementById('modalBookPrice').textContent = button.dataset.price;
+      document.getElementById('modalBookStock').textContent = button.dataset.stock;
+      document.getElementById('modalBookImage').src = button.dataset.image;
+
+      // Animasi buka modal
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.add('flex');
+        modalBox.classList.add('opacity-100', 'scale-100');
+        modalBox.classList.remove('opacity-0', 'scale-95');
+      }, 10);
+
+      // Setup tombol Add to Cart
+      const addToCartBtn = document.getElementById('modalAddToCart');
+      addToCartBtn.onclick = () => {
+        const bookId = button.dataset.bookId;
+        const title = button.dataset.title;
+        document.querySelector(`[data-book-id="${bookId}"].add-to-cart`).click();
+        closeBookModal();
+      };
+    }
+
+    function closeBookModal() {
+      const modal = document.getElementById('bookModal');
+      const modalBox = document.getElementById('bookModalBox');
+
+      modalBox.classList.remove('opacity-100', 'scale-100');
+      modalBox.classList.add('opacity-0', 'scale-95');
+
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }, 200);
+    }
+
+    // Tutup modal saat klik overlay
+    document.getElementById('bookModal').addEventListener('click', function (e) {
+      if (e.target === this) closeBookModal();
     });
   </script>
 @endpush
