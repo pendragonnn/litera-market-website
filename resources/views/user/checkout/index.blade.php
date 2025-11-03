@@ -25,27 +25,34 @@
   </div>
 
   {{-- Checkout Form --}}
-  <form action="{{ route('user.checkout.store') }}" method="POST" class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-5">
+  <form action="{{ route('user.checkout.store') }}" method="POST" 
+        class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-5">
     @csrf
+    @php $user = Auth::user(); @endphp
 
+    {{-- Full Name --}}
     <div>
       <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-      <input type="text" name="name" id="name" required
-        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#d2c1b6] focus:border-[#d2c1b6]">
+      <input type="text" name="name_display" id="name" value="{{ $user->name }}" disabled
+        class="w-full border border-gray-300 bg-gray-100 rounded-md px-3 py-2 text-gray-700 cursor-not-allowed">
+      <input type="hidden" name="name" value="{{ $user->name }}">
     </div>
 
+    {{-- Address --}}
     <div>
       <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Full Address</label>
       <textarea name="address" id="address" rows="3" required
-        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#d2c1b6] focus:border-[#d2c1b6]"></textarea>
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#d2c1b6] focus:border-[#d2c1b6]">{{ old('address', $user->address ?? '') }}</textarea>
     </div>
 
+    {{-- WhatsApp Number --}}
     <div>
       <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number</label>
-      <input type="text" name="phone" id="phone" required
+      <input type="text" name="phone" id="phone" value="{{ old('phone', $user->phone ?? '') }}" required
         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#d2c1b6] focus:border-[#d2c1b6]">
     </div>
 
+    {{-- Payment Method --}}
     <div>
       <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
       <select name="payment_method" id="payment_method" required
@@ -56,6 +63,7 @@
       </select>
     </div>
 
+    {{-- Submit --}}
     <div class="pt-4 flex justify-end">
       <button type="submit"
         class="px-6 py-2 bg-[#1B3C53] text-white rounded-md hover:bg-[#163246] transition text-sm font-medium">

@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 class CheckoutController extends Controller
 {
     /**
-     * Show checkout page with cart summary
+     * Show checkout page
      */
     public function index()
     {
@@ -33,28 +33,34 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Handle checkout form submission
+     * Handle checkout form
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'             => 'required|string|max:255',
-            'address'          => 'required|string|max:500',
-            'phone'            => 'required|string|max:20',
-            'payment_method'   => 'required|string|max:100',
+            'name'           => 'required|string|max:255',
+            'address'        => 'required|string|max:500',
+            'phone'          => 'required|string|max:20',
+            'payment_method' => 'required|string|max:100',
         ]);
 
         DB::beginTransaction();
 
         try {
             $user = Auth::user();
+
+            // Update user info if empty or changed
+            $user->update([
+                'address' => $validated['address'],
+                'phone'   => $validated['phone'],
+            ]);
+
             $cartItems = CartItem::with('book')->where('user_id', $user->id)->get();
 
             if ($cartItems->isEmpty()) {
                 return redirect()->route('user.cart.index')->with('error', 'Your cart is empty.');
             }
 
-            // Calculate total price
             $totalPrice = $cartItems->sum(fn($item) => $item->book->price * $item->quantity);
 
             // Create order
@@ -67,7 +73,7 @@ class CheckoutController extends Controller
                 'status'      => 'pending',
             ]);
 
-            // Create order items and reduce stock
+            // Create order items + reduce stock
             foreach ($cartItems as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -80,7 +86,7 @@ class CheckoutController extends Controller
                 $item->book->decrement('stock', $item->quantity);
             }
 
-            // Create payment record
+            // Create payment
             Payment::create([
                 'order_id'        => $order->id,
                 'payment_method'  => $validated['payment_method'],
@@ -93,7 +99,8 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            return redirect()->route('user.checkout.success', ['order' => $order->id]);
+            return redirect()->route('user.checkout.success', ['order' => $order->id])
+                ->with('success', 'Your order has been placed successfully!');
 
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -102,7 +109,7 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Show success page
+     * Success page
      */
     public function success(Order $order)
     {
