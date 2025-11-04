@@ -87,6 +87,13 @@ Route::middleware(['auth', 'role:customer'])->prefix('user')->name('user.')->gro
     Route::patch('/orders/{order}/cancel', [MyOrdersController::class, 'cancel'])->name('orders.cancel');
     Route::patch('/orders/{order}/complete', [MyOrdersController::class, 'complete'])->name('orders.complete');
     Route::post('/orders/{order}/upload-proof', [MyOrdersController::class, 'storeProof'])->name('orders.store-proof');
+
+    // Reviews
+    Route::prefix('reviews')->name('reviews.')->group(function () {
+        Route::post('/{orderItem}', [\App\Http\Controllers\User\ReviewController::class, 'store'])->name('store');
+        Route::put('/{review}', [\App\Http\Controllers\User\ReviewController::class, 'update'])->name('update');
+        Route::delete('/{review}', [\App\Http\Controllers\User\ReviewController::class, 'destroy'])->name('destroy');
+    });
 });
 
 require __DIR__ . '/auth.php';
