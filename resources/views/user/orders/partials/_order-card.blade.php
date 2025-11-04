@@ -57,7 +57,7 @@
               {{-- Belum ada review --}}
               <button @click="$dispatch('open-review', { 
                               mode:'create', 
-                              orderId: {{ $item->id }}, 
+                              orderItemId: {{ $item->id }}, 
                               rating: 0, 
                               comment: '' 
                             }); modal='review';"

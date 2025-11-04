@@ -5,6 +5,7 @@
                 tab: new URLSearchParams(window.location.search).get('tab') || 'All', 
                 modal: null, 
                 orderId: null,
+                orderItemId: null,
                 reviewMode: 'create',
                 reviewId: null,
                 setTab(status) {
@@ -136,7 +137,7 @@
     <div x-show="modal === 'review'" x-cloak class="fixed inset-0 flex items-center justify-center bg-black/40 z-50"
       x-data="{ currentRating: 0, currentComment: '' }" @open-review.window="
             reviewMode = $event.detail.mode;
-            orderId    = $event.detail.orderId ?? null;
+            orderItemId    = $event.detail.orderItemId ?? null;
             reviewId   = $event.detail.reviewId ?? null;
             currentRating  = Number($event.detail.rating ?? 0);
             currentComment = $event.detail.comment ?? '';
@@ -146,7 +147,7 @@
           x-text="reviewMode === 'create' ? 'Write a Review' : 'Edit Review'"></h3>
 
         <form method="POST" x-bind:action="reviewMode === 'create' 
-                    ? `/user/reviews/${orderId}` 
+                    ? `/user/reviews/${orderItemId}` 
                     : `/user/reviews/${reviewId}`">
           @csrf
           <template x-if="reviewMode === 'edit'">
