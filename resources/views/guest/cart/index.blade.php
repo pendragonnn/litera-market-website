@@ -29,7 +29,8 @@
                 class="w-full h-[450px] object-cover rounded-md border mb-3">
 
               <h3 class="text-[#1B3C53] font-semibold text-lg truncate" x-text="item.title"></h3>
-              <p class="text-gray-600 text-sm mb-2">Rp <span x-text="Number(item.price).toLocaleString('id-ID')"></span></p>
+              <p class="text-gray-600 text-sm mb-2">Rp <span x-text="Number(item.price).toLocaleString('id-ID')"></span>
+              </p>
 
               {{-- Quantity input --}}
               <div class="flex items-center gap-2 mb-2">
@@ -66,7 +67,7 @@
             </button>
 
             {{-- Checkout --}}
-            <a href="#"
+            <a href="{{ route('guest.checkout.index') }}"
               class="px-5 py-2 bg-[#1B3C53] text-white rounded-md hover:bg-[#163246] text-sm font-medium">
               Checkout as Guest
             </a>
@@ -116,95 +117,95 @@
     </div>
 @endsection
 
-@push('scripts')
-  <style>
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: scale(0.95);
-      }
-
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    .animate-fadeIn {
-      animation: fadeIn 0.25s ease-in-out;
-    }
-  </style>
-
-  <script>
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('guestCart', () => ({
-        items: [],
-        totalPrice: 0,
-        deleteIndex: null,
-
-        loadCart() {
-          this.items = JSON.parse(localStorage.getItem('guest_cart') || '[]');
-          this.calculateTotal();
-          this.updateNavCartCount();
-        },
-
-        saveCart() {
-          localStorage.setItem('guest_cart', JSON.stringify(this.items));
-          this.calculateTotal();
-          this.updateNavCartCount();
-        },
-
-        updateItem(index) {
-          this.items[index].quantity = Math.max(1, this.items[index].quantity);
-          this.saveCart();
-        },
-
-        openDeleteModal(index) {
-          this.deleteIndex = index;
-          const item = this.items[index];
-          document.getElementById('deleteItemName').textContent = `"${item.title}"`;
-          const modal = document.getElementById('deleteModal');
-          modal.classList.remove('hidden');
-          modal.classList.add('flex');
-        },
-
-        confirmDelete() {
-          if (this.deleteIndex !== null) {
-            this.items.splice(this.deleteIndex, 1);
-            this.saveCart();
-          }
-          this.closeModal('deleteModal');
-        },
-
-        openClearModal() {
-          const modal = document.getElementById('clearModal');
-          modal.classList.remove('hidden');
-          modal.classList.add('flex');
-        },
-
-        confirmClear() {
-          this.items = [];
-          localStorage.removeItem('guest_cart');
-          this.calculateTotal();
-          this.updateNavCartCount();
-          this.closeModal('clearModal');
-        },
-
-        closeModal(id) {
-          const modal = document.getElementById(id);
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        },
-
-        calculateTotal() {
-          this.totalPrice = this.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-        },
-
-        updateNavCartCount() {
-          const count = this.items.reduce((sum, i) => sum + i.quantity, 0);
-          window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count } }));
+  @push('scripts')
+    <style>
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
         }
-      }));
-    });
-  </script>
-@endpush
+
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .animate-fadeIn {
+        animation: fadeIn 0.25s ease-in-out;
+      }
+    </style>
+
+    <script>
+      document.addEventListener('alpine:init', () => {
+        Alpine.data('guestCart', () => ({
+          items: [],
+          totalPrice: 0,
+          deleteIndex: null,
+
+          loadCart() {
+            this.items = JSON.parse(localStorage.getItem('guest_cart') || '[]');
+            this.calculateTotal();
+            this.updateNavCartCount();
+          },
+
+          saveCart() {
+            localStorage.setItem('guest_cart', JSON.stringify(this.items));
+            this.calculateTotal();
+            this.updateNavCartCount();
+          },
+
+          updateItem(index) {
+            this.items[index].quantity = Math.max(1, this.items[index].quantity);
+            this.saveCart();
+          },
+
+          openDeleteModal(index) {
+            this.deleteIndex = index;
+            const item = this.items[index];
+            document.getElementById('deleteItemName').textContent = `"${item.title}"`;
+            const modal = document.getElementById('deleteModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+          },
+
+          confirmDelete() {
+            if (this.deleteIndex !== null) {
+              this.items.splice(this.deleteIndex, 1);
+              this.saveCart();
+            }
+            this.closeModal('deleteModal');
+          },
+
+          openClearModal() {
+            const modal = document.getElementById('clearModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+          },
+
+          confirmClear() {
+            this.items = [];
+            localStorage.removeItem('guest_cart');
+            this.calculateTotal();
+            this.updateNavCartCount();
+            this.closeModal('clearModal');
+          },
+
+          closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+          },
+
+          calculateTotal() {
+            this.totalPrice = this.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+          },
+
+          updateNavCartCount() {
+            const count = this.items.reduce((sum, i) => sum + i.quantity, 0);
+            window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count } }));
+          }
+        }));
+      });
+    </script>
+  @endpush

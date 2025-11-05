@@ -9,10 +9,12 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\User\CartController;
 use App\Http\Controllers\User\CheckoutController;
 use App\Http\Controllers\User\MyOrdersController;
-use App\Http\Controllers\Guest\GuestCartController; 
-use App\Http\Controllers\Guest\GuestCheckoutController; 
+use App\Http\Controllers\Guest\GuestCartController;
+use App\Http\Controllers\Guest\GuestCheckoutController;
 use App\Models\CartItem;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
 // === Public Route ===
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -105,6 +107,11 @@ Route::middleware(['auth', 'role:customer'])->prefix('user')->name('user.')->gro
 Route::prefix('guest')->name('guest.')->group(function () {
     // Guest Cart
     Route::get('/cart', [GuestCartController::class, 'index'])->name('cart.index');
+
+    // Guest Checkout
+    Route::get('/checkout', [GuestCheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [GuestCheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout/success/{token}', [GuestCheckoutController::class, 'success'])->name('checkout.success');
 });
 
 Route::middleware('auth:sanctum')->get('/cart/count', function (Request $request) {
