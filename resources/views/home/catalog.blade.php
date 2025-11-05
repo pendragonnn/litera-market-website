@@ -23,7 +23,7 @@
               <button class="bg-[#002D72] text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-[#001E4D]"
                 data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-author="{{ $book->author }}"
                 data-description="{{ $book->description }}"
-                data-price="{{ number_format($book->price ?? 0, 0, ',', '.') }}" data-stock="{{ $book->stock }}"
+                data-price="{{ $book->price ?? 0 }}" data-stock="{{ $book->stock }}"
                 data-image="{{ $book->image ?? asset('images/default-book.jpg') }}" onclick="openBookModal(this)">
                 Detail
               </button>
@@ -31,7 +31,8 @@
               {{-- Add to Cart Button --}}
               <button
                 class="add-to-cart bg-[#1B3C53] text-white text-sm font-medium px-3 py-2 rounded-md hover:bg-[#102a3e] transition disabled:opacity-50 disabled:cursor-not-allowed"
-                data-book-id="{{ $book->id }}" data-title="{{ $book->title }}">
+                data-book-id="{{ $book->id }}" data-title="{{ $book->title }}"
+                data-price="{{ $book->price ?? 0 }}" data-image="{{ $book->image ?? asset('images/default-book.jpg') }}">
                 🛒
               </button>
             </div>
@@ -58,14 +59,10 @@
   <div
     class="bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-xl shadow-xl w-[90%] max-w-md transform scale-95 opacity-0 transition-all duration-300"
     id="cartAlertBox">
-
-    {{-- Header --}}
     <div class="border-b border-[#d2c1b6]/60 px-4 py-3 flex justify-between items-center rounded-t-xl">
       <h2 class="font-semibold text-[#1B3C53]">LiteraMarket</h2>
       <button id="closeAlertBtn" class="text-[#1B3C53]/60 hover:text-[#1B3C53] text-sm font-bold">✕</button>
     </div>
-
-    {{-- Content --}}
     <div class="px-5 py-4 text-start">
       <p id="cartAlertText" class="text-[#1B3C53] text-sm font-medium"></p>
     </div>
@@ -77,39 +74,25 @@
   <div
     class="bg-white rounded-xl shadow-2xl w-[90%] max-w-3xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300"
     id="bookModalBox">
-
-    {{-- Header --}}
     <div class="flex justify-between items-center border-b border-gray-200 px-6 py-4 bg-[#F9F3EF]">
       <h2 class="text-lg font-semibold text-[#1B3C53]" id="modalBookTitle">Book Title</h2>
       <button onclick="closeBookModal()" class="text-[#1B3C53]/70 hover:text-[#1B3C53] text-lg font-bold">✕</button>
     </div>
-
-    {{-- Content --}}
     <div class="grid md:grid-cols-2 gap-6 p-6 items-center">
-      {{-- Image --}}
       <div class="flex justify-center">
         <img id="modalBookImage" src="{{ asset('images/default-book.jpg') }}" alt="Book Image"
           class="h-64 object-contain rounded-md">
       </div>
-
-      {{-- Info --}}
       <div>
         <h3 class="font-bold text-[#1B3C53] text-xl mb-1" id="modalBookTitleText">Book Title</h3>
         <p class="text-gray-600 text-sm mb-3" id="modalBookAuthor">Author Name</p>
-
-        <p class="text-sm text-gray-700 mb-4" id="modalBookDescription">
-          Description of the book goes here.
-        </p>
-
+        <p class="text-sm text-gray-700 mb-4" id="modalBookDescription">Description of the book goes here.</p>
         <p class="font-semibold text-[#C0392B] mb-2">
           Rp <span id="modalBookPrice">0</span>
         </p>
-
         <p class="text-sm text-gray-500 mb-4">
           Stock: <span id="modalBookStock">0</span>
         </p>
-
-        {{-- Action --}}
         <div class="flex gap-3">
           <button id="modalAddToCart"
             class="bg-[#1B3C53] text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-[#102a3e] transition">
@@ -121,43 +104,33 @@
   </div>
 </div>
 
-
 @push('scripts')
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      const isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
       const cartAlert = document.getElementById('cartAlert');
       const alertBox = document.getElementById('cartAlertBox');
       const alertText = document.getElementById('cartAlertText');
       const closeBtn = document.getElementById('closeAlertBtn');
-      const cartCountElement = document.querySelector('.cart-count');
-      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
+      /* === ALERT === */
       function showAlert(message, type = 'success') {
         const isSuccess = type === 'success';
-
-        // Set message
         alertText.textContent = message;
-
-        // Reset styles
         alertBox.classList.remove('bg-red-50', 'border-red-300', 'text-red-700');
         alertBox.classList.remove('bg-[#F9F3EF]', 'border-[#d2c1b6]/70', 'text-[#1B3C53]');
-
-        // Apply colors
         if (isSuccess) {
           alertBox.classList.add('bg-[#F9F3EF]', 'border-[#d2c1b6]/70', 'text-[#1B3C53]');
         } else {
           alertBox.classList.add('bg-red-50', 'border-red-300', 'text-red-700');
         }
-
-        // Show modal
         cartAlert.classList.remove('hidden');
         cartAlert.classList.add('flex');
         setTimeout(() => {
           alertBox.classList.add('opacity-100', 'scale-100');
           alertBox.classList.remove('opacity-0', 'scale-95');
         }, 10);
-
-        // Auto close
         setTimeout(() => hideAlert(), 2500);
       }
 
@@ -169,108 +142,114 @@
           cartAlert.classList.remove('flex');
         }, 300);
       }
-
       closeBtn.addEventListener('click', hideAlert);
 
       function updateCartCount(count) {
-        document.querySelectorAll('.cart-count').forEach((el) => {
+        document.querySelectorAll('.cart-count').forEach(el => {
           el.textContent = count;
           el.classList.add('animate-bounce');
           setTimeout(() => el.classList.remove('animate-bounce'), 500);
         });
       }
 
-      async function addToCart(bookId, bookTitle, button) {
-        button.disabled = true;
-        const originalText = button.innerHTML;
-        button.innerHTML = '⏳';
+      /* === ADD TO CART === */
+      document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function () {
+          const bookId = Number(this.dataset.bookId);
+          const title = this.dataset.title;
+          const price = Number(this.dataset.price);
+          const image = this.dataset.image;
 
+          if (!isLoggedIn) {
+            // === Guest: save to localStorage ===
+            const cart = JSON.parse(localStorage.getItem('guest_cart') || '[]');
+            const existing = cart.find(i => i.book_id === bookId);
+            if (existing) {
+              existing.quantity += 1;
+            } else {
+              cart.push({ book_id: bookId, title, price, quantity: 1, image });
+            }
+            localStorage.setItem('guest_cart', JSON.stringify(cart));
+            const totalCount = cart.reduce((sum, i) => sum + i.quantity, 0);
+            window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: totalCount } }));
+            showAlert(`"${title}" added to your cart!`, 'success');
+            return;
+          }
+
+          // === Logged in: send to backend ===
+          addToUserCart(bookId, title, this);
+        });
+      });
+
+      async function addToUserCart(bookId, title, button) {
+        button.disabled = true;
+        const original = button.innerHTML;
+        button.innerHTML = '⏳';
         try {
-          const response = await fetch(`/user/cart/${bookId}`, {
+          const res = await fetch(`/user/cart/${bookId}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
               'X-CSRF-TOKEN': csrfToken,
-              'X-Requested-With': 'XMLHttpRequest',
             },
-            credentials: 'same-origin',
-            body: JSON.stringify({ quantity: 1 }),
+            body: JSON.stringify({ quantity: 1 })
           });
-
-          const data = await response.json();
-
-          if (response.ok && data.success) {
-            showAlert(`"${bookTitle}" added to your cart!`, 'success');
+          const data = await res.json();
+          if (res.ok && data.success) {
+            showAlert(`"${title}" added to your cart!`);
             updateCartCount(data.cart_count);
           } else {
             throw new Error(data.message || 'Failed to add to cart');
           }
-        } catch (error) {
-          console.error('❌ Add to cart error:', error);
+        } catch (err) {
+          console.error(err);
           showAlert('Something went wrong. Please try again.', 'error');
         } finally {
           button.disabled = false;
-          button.innerHTML = originalText;
+          button.innerHTML = original;
         }
       }
 
-      document.querySelectorAll('.add-to-cart').forEach(button => {
-        button.addEventListener('click', function () {
-          const bookId = this.dataset.bookId;
-          const bookTitle = this.dataset.title;
-          if (!bookId) return showAlert('Invalid book. Please refresh the page.', 'error');
-          addToCart(bookId, bookTitle, this);
-        });
+      /* === Book Modal === */
+      function openBookModal(button) {
+        const modal = document.getElementById('bookModal');
+        const modalBox = document.getElementById('bookModalBox');
+        document.getElementById('modalBookTitle').textContent = button.dataset.title;
+        document.getElementById('modalBookTitleText').textContent = button.dataset.title;
+        document.getElementById('modalBookAuthor').textContent = button.dataset.author || 'Unknown Author';
+        document.getElementById('modalBookDescription').textContent = button.dataset.description || 'No description available.';
+        document.getElementById('modalBookPrice').textContent = button.dataset.price;
+        document.getElementById('modalBookStock').textContent = button.dataset.stock;
+        document.getElementById('modalBookImage').src = button.dataset.image;
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          modal.classList.add('flex');
+          modalBox.classList.add('opacity-100', 'scale-100');
+          modalBox.classList.remove('opacity-0', 'scale-95');
+        }, 10);
+
+        const addToCartBtn = document.getElementById('modalAddToCart');
+        addToCartBtn.onclick = () => {
+          document.querySelector(`[data-book-id="${button.dataset.bookId}"].add-to-cart`).click();
+          closeBookModal();
+        };
+      }
+
+      function closeBookModal() {
+        const modal = document.getElementById('bookModal');
+        const modalBox = document.getElementById('bookModalBox');
+        modalBox.classList.remove('opacity-100', 'scale-100');
+        modalBox.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }, 200);
+      }
+      document.getElementById('bookModal').addEventListener('click', function (e) {
+        if (e.target === this) closeBookModal();
       });
-    });
-    function openBookModal(button) {
-      const modal = document.getElementById('bookModal');
-      const modalBox = document.getElementById('bookModalBox');
-
-      // Ambil data dari tombol
-      document.getElementById('modalBookTitle').textContent = button.dataset.title;
-      document.getElementById('modalBookTitleText').textContent = button.dataset.title;
-      document.getElementById('modalBookAuthor').textContent = button.dataset.author || 'Unknown Author';
-      document.getElementById('modalBookDescription').textContent = button.dataset.description || 'No description available.';
-      document.getElementById('modalBookPrice').textContent = button.dataset.price;
-      document.getElementById('modalBookStock').textContent = button.dataset.stock;
-      document.getElementById('modalBookImage').src = button.dataset.image;
-
-      // Animasi buka modal
-      modal.classList.remove('hidden');
-      setTimeout(() => {
-        modal.classList.add('flex');
-        modalBox.classList.add('opacity-100', 'scale-100');
-        modalBox.classList.remove('opacity-0', 'scale-95');
-      }, 10);
-
-      // Setup tombol Add to Cart
-      const addToCartBtn = document.getElementById('modalAddToCart');
-      addToCartBtn.onclick = () => {
-        const bookId = button.dataset.bookId;
-        const title = button.dataset.title;
-        document.querySelector(`[data-book-id="${bookId}"].add-to-cart`).click();
-        closeBookModal();
-      };
-    }
-
-    function closeBookModal() {
-      const modal = document.getElementById('bookModal');
-      const modalBox = document.getElementById('bookModalBox');
-
-      modalBox.classList.remove('opacity-100', 'scale-100');
-      modalBox.classList.add('opacity-0', 'scale-95');
-
-      setTimeout(() => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }, 200);
-    }
-
-    // Tutup modal saat klik overlay
-    document.getElementById('bookModal').addEventListener('click', function (e) {
-      if (e.target === this) closeBookModal();
     });
   </script>
 @endpush
