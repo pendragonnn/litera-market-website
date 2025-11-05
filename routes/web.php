@@ -11,6 +11,7 @@ use App\Http\Controllers\User\CheckoutController;
 use App\Http\Controllers\User\MyOrdersController;
 use App\Http\Controllers\Guest\GuestCartController;
 use App\Http\Controllers\Guest\GuestCheckoutController;
+use App\Http\Controllers\Guest\GuestOrderTrackerController;
 use App\Models\CartItem;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -112,6 +113,14 @@ Route::prefix('guest')->name('guest.')->group(function () {
     Route::get('/checkout', [GuestCheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [GuestCheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/success/{token}', [GuestCheckoutController::class, 'success'])->name('checkout.success');
+
+    // Guest Order Tracker
+    Route::get('/order-tracker', [GuestOrderTrackerController::class, 'index'])->name('order.tracker.index');
+    Route::post('/order-tracker/find', [GuestOrderTrackerController::class, 'find'])->name('order.tracker.find');
+    Route::get('/order/{token}', [GuestOrderTrackerController::class, 'show'])->name('order.tracker.show');
+    Route::post('/order/{token}/upload-proof', [GuestOrderTrackerController::class, 'uploadProof'])->name('order.tracker.upload');
+    Route::patch('/order/{token}/cancel', [GuestOrderTrackerController::class, 'cancel'])->name('order.tracker.cancel');
+    Route::patch('/order/{token}/complete', [GuestOrderTrackerController::class, 'complete'])->name('order.tracker.complete');
 });
 
 Route::middleware('auth:sanctum')->get('/cart/count', function (Request $request) {
