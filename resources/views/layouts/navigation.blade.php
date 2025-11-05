@@ -1,10 +1,10 @@
 @php
-    use App\Models\CartItem;
-    use Illuminate\Support\Facades\Auth;
+  use App\Models\CartItem;
+  use Illuminate\Support\Facades\Auth;
 
-    $cartCount = Auth::check()
-        ? CartItem::where('user_id', Auth::id())->sum('quantity')
-        : 0;
+  $cartCount = Auth::check()
+    ? CartItem::where('user_id', Auth::id())->sum('quantity')
+    : 0;
 @endphp
 
 <nav x-data="{ open: false }" class="bg-white shadow-sm" x-init="initCartCount()">
@@ -35,6 +35,21 @@
           @endforeach
         </select>
       </form>
+
+      {{-- === Order Tracker / My Orders === --}}
+      @guest
+        <a href="{{ route('guest.order.tracker.index') }}"
+          class="text-gray-700 border border-gray-400 rounded-md px-3 py-1 hover:bg-gray-100 text-sm font-medium">
+          📦 Order Tracker
+        </a>
+      @endguest
+
+      @auth
+        <a href="{{ route('user.user.orders.index') }}"
+          class="text-gray-700 border border-gray-400 rounded-md px-3 py-1 hover:bg-gray-100 text-sm font-medium">
+          📦 My Orders
+        </a>
+      @endauth
 
       {{-- === Cart Icon === --}}
       <a href="{{ auth()->check() ? route('user.cart.index') : route('guest.cart.index') }}"
@@ -75,8 +90,7 @@
             <x-dropdown-link :href="route('profile.edit')">Profile</x-dropdown-link>
             <form method="POST" action="{{ route('logout') }}">
               @csrf
-              <x-dropdown-link :href="route('logout')"
-                onclick="event.preventDefault(); this.closest('form').submit();">
+              <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
                 Log Out
               </x-dropdown-link>
             </form>
@@ -111,6 +125,21 @@
           class="cart-count bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{{ $cartCount }}</span>
       </a>
 
+      {{-- === Order Tracker / My Orders (Mobile) === --}}
+      @guest
+        <a href="{{ route('guest.order.tracker.index') }}"
+          class="block border border-gray-300 rounded-md px-3 py-2 text-gray-700 hover:bg-gray-50">
+          📦 Order Tracker
+        </a>
+      @endguest
+
+      @auth
+        <a href="{{ route('user.user.orders.index') }}"
+          class="block border border-gray-300 rounded-md px-3 py-2 text-gray-700 hover:bg-gray-50">
+          📦 My Orders
+        </a>
+      @endauth
+
       <hr class="border-gray-300">
 
       {{-- Auth Buttons --}}
@@ -131,8 +160,7 @@
           <x-dropdown-link :href="route('profile.edit')">Profile</x-dropdown-link>
           <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <x-dropdown-link :href="route('logout')"
-              onclick="event.preventDefault(); this.closest('form').submit();">
+            <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
               Log Out
             </x-dropdown-link>
           </form>
@@ -143,43 +171,43 @@
 </nav>
 
 @push('scripts')
-<script>
-  async function fetchUserCartCount() {
-    try {
-      const response = await fetch('/api/cart/count', {
-        headers: { 'Accept': 'application/json' },
-        credentials: 'same-origin'
-      });
-      if (response.ok) {
-        const data = await response.json();
-        updateNavCartCount(data.count);
+  <script>
+    async function fetchUserCartCount() {
+      try {
+        const response = await fetch('/api/cart/count', {
+          headers: { 'Accept': 'application/json' },
+          credentials: 'same-origin'
+        });
+        if (response.ok) {
+          const data = await response.json();
+          updateNavCartCount(data.count);
+        }
+      } catch (e) {
+        console.warn('⚠️ Failed to fetch cart count', e);
       }
-    } catch (e) {
-      console.warn('⚠️ Failed to fetch cart count', e);
     }
-  }
 
-  function initCartCount() {
-    const isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
-    if (isLoggedIn) {
-      fetchUserCartCount();
-    } else {
-      const cart = JSON.parse(localStorage.getItem('guest_cart') || '[]');
-      updateNavCartCount(cart.reduce((sum, i) => sum + (i.quantity || 0), 0));
+    function initCartCount() {
+      const isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
+      if (isLoggedIn) {
+        fetchUserCartCount();
+      } else {
+        const cart = JSON.parse(localStorage.getItem('guest_cart') || '[]');
+        updateNavCartCount(cart.reduce((sum, i) => sum + (i.quantity || 0), 0));
+      }
     }
-  }
 
-  function updateNavCartCount(count) {
-    document.querySelectorAll('.cart-count').forEach(el => {
-      el.textContent = count;
-      el.classList.add('animate-bounce');
-      setTimeout(() => el.classList.remove('animate-bounce'), 500);
+    function updateNavCartCount(count) {
+      document.querySelectorAll('.cart-count').forEach(el => {
+        el.textContent = count;
+        el.classList.add('animate-bounce');
+        setTimeout(() => el.classList.remove('animate-bounce'), 500);
+      });
+    }
+
+    // Event listener biar sinkron dari halaman cart / katalog
+    window.addEventListener('cart-updated', (e) => {
+      updateNavCartCount(e.detail.count);
     });
-  }
-
-  // Event listener biar sinkron dari halaman cart / katalog
-  window.addEventListener('cart-updated', (e) => {
-    updateNavCartCount(e.detail.count);
-  });
-</script>
+  </script>
 @endpush

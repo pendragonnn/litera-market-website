@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Guest;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class GuestOrderTrackerController extends Controller
 {
@@ -34,7 +36,7 @@ class GuestOrderTrackerController extends Controller
     }
 
     /**
-     * Show order details
+     * Show guest order details
      */
     public function show($token)
     {
@@ -50,49 +52,62 @@ class GuestOrderTrackerController extends Controller
      */
     public function uploadProof(Request $request, $token)
     {
-        $order = Order::where('token_order', $token)->with('payment')->firstOrFail();
-
         $request->validate([
-            'payment_proof' => 'required|image|max:2048',
+            'payment_proof' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $path = $request->file('payment_proof')->store('payment_proofs', 'public');
+        $order = Order::where('token_order', $token)->with('payment')->firstOrFail();
+        $payment = $order->payment;
 
-        $order->payment->update([
-            'payment_proof' => $path,
-            'payment_status' => 'Pending Approval',
+        if (!$payment) {
+            return back()->with('error', 'Payment record not found.');
+        }
+
+        $path = $request->file('payment_proof')->store('payments', 'public');
+
+        $payment->update([
+            'payment_proof'  => $path,
+            'payment_status' => 'Awaiting Approval',
         ]);
+
+        $order->update(['status' => 'Processed']);
 
         return back()->with('success', 'Payment proof uploaded successfully!');
     }
 
     /**
-     * Cancel order (if still pending)
+     * Cancel guest order
      */
     public function cancel($token)
     {
-        $order = Order::where('token_order', $token)->firstOrFail();
+        $order = Order::where('token_order', $token)->with('payment')->firstOrFail();
 
-        if ($order->status === 'Pending') {
-            $order->update(['status' => 'Cancelled']);
-            return back()->with('success', 'Order cancelled successfully.');
+        if (!in_array($order->status, ['Pending', 'Processed'])) {
+            return back()->with('error', 'You can only cancel pending or processed orders.');
         }
 
-        return back()->with('error', 'This order cannot be cancelled.');
+        $order->update(['status' => 'Cancelled']);
+
+        if ($order->payment) {
+            $order->payment->update(['payment_status' => 'Rejected']);
+        }
+
+        return back()->with('success', 'Order has been cancelled successfully.');
     }
 
     /**
-     * Mark order as complete
+     * Mark guest order as completed
      */
     public function complete($token)
     {
         $order = Order::where('token_order', $token)->firstOrFail();
 
-        if (in_array($order->status, ['Processed', 'Shipped'])) {
-            $order->update(['status' => 'Delivered']);
-            return back()->with('success', 'Order marked as completed.');
+        if ($order->status !== 'Shipped') {
+            return back()->with('error', 'Only shipped orders can be marked as complete.');
         }
 
-        return back()->with('error', 'This order cannot be marked as completed.');
+        $order->update(['status' => 'Delivered']);
+
+        return back()->with('success', 'Order marked as delivered successfully.');
     }
 }
