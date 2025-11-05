@@ -11,6 +11,7 @@ use App\Http\Controllers\User\CheckoutController;
 use App\Http\Controllers\User\MyOrdersController;
 use App\Http\Controllers\Guest\GuestCartController; 
 use App\Http\Controllers\Guest\GuestCheckoutController; 
+use App\Models\CartItem;
 use Illuminate\Support\Facades\Route;
 
 // === Public Route ===
@@ -104,6 +105,11 @@ Route::middleware(['auth', 'role:customer'])->prefix('user')->name('user.')->gro
 Route::prefix('guest')->name('guest.')->group(function () {
     // Guest Cart
     Route::get('/cart', [GuestCartController::class, 'index'])->name('cart.index');
+});
+
+Route::middleware('auth:sanctum')->get('/cart/count', function (Request $request) {
+    $count = CartItem::where('user_id', $request->user()->id)->sum('quantity');
+    return response()->json(['count' => $count]);
 });
 
 require __DIR__ . '/auth.php';
