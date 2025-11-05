@@ -74,47 +74,46 @@
         </div>
       </div>
     </template>
-  </div>
 
-  {{-- === Delete Confirmation Modal === --}}
-  <div id="deleteModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-    <div class="bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-xl shadow-xl w-[90%] max-w-md animate-fadeIn">
-      <div class="border-b border-[#d2c1b6]/60 px-4 py-3 flex justify-between items-center">
-        <h2 class="font-semibold text-[#1B3C53]">LiteraMarket</h2>
-        <button @click="closeModal('deleteModal')" class="text-[#1B3C53]/60 hover:text-[#1B3C53]">✕</button>
-      </div>
-      <div class="px-5 py-4 text-center">
-        <p class="text-[#1B3C53] mb-5 text-sm">
-          Are you sure you want to remove <span id="deleteItemName" class="font-semibold"></span> from your cart?
-        </p>
-        <div class="flex justify-center gap-3">
-          <button type="button" @click="closeModal('deleteModal')"
-            class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm font-medium">Cancel</button>
-          <button @click="confirmDelete()"
-            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">Delete</button>
+    {{-- === Delete Confirmation Modal === --}}
+    <div id="deleteModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+      <div class="bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-xl shadow-xl w-[90%] max-w-md animate-fadeIn">
+        <div class="border-b border-[#d2c1b6]/60 px-4 py-3 flex justify-between items-center">
+          <h2 class="font-semibold text-[#1B3C53]">LiteraMarket</h2>
+          <button @click="closeModal('deleteModal')" class="text-[#1B3C53]/60 hover:text-[#1B3C53]">✕</button>
+        </div>
+        <div class="px-5 py-4 text-center">
+          <p class="text-[#1B3C53] mb-5 text-sm">
+            Are you sure you want to remove <span id="deleteItemName" class="font-semibold"></span> from your cart?
+          </p>
+          <div class="flex justify-center gap-3">
+            <button type="button" @click="closeModal('deleteModal')"
+              class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm font-medium">Cancel</button>
+            <button @click="confirmDelete()"
+              class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">Delete</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  {{-- === Clear Cart Confirmation Modal === --}}
-  <div id="clearModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-    <div class="bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-xl shadow-xl w-[90%] max-w-md animate-fadeIn">
-      <div class="border-b border-[#d2c1b6]/60 px-4 py-3 flex justify-between items-center">
-        <h2 class="font-semibold text-[#1B3C53]">LiteraMarket</h2>
-        <button @click="closeModal('clearModal')" class="text-[#1B3C53]/60 hover:text-[#1B3C53]">✕</button>
-      </div>
-      <div class="px-5 py-4 text-center">
-        <p class="text-[#1B3C53] mb-5 text-sm">Are you sure you want to clear your entire cart?</p>
-        <div class="flex justify-center gap-3">
-          <button type="button" @click="closeModal('clearModal')"
-            class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm font-medium">Cancel</button>
-          <button @click="confirmClear()"
-            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">Clear</button>
+    {{-- === Clear Cart Confirmation Modal === --}}
+    <div id="clearModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+      <div class="bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-xl shadow-xl w-[90%] max-w-md animate-fadeIn">
+        <div class="border-b border-[#d2c1b6]/60 px-4 py-3 flex justify-between items-center">
+          <h2 class="font-semibold text-[#1B3C53]">LiteraMarket</h2>
+          <button @click="closeModal('clearModal')" class="text-[#1B3C53]/60 hover:text-[#1B3C53]">✕</button>
+        </div>
+        <div class="px-5 py-4 text-center">
+          <p class="text-[#1B3C53] mb-5 text-sm">Are you sure you want to clear your entire cart?</p>
+          <div class="flex justify-center gap-3">
+            <button type="button" @click="closeModal('clearModal')"
+              class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm font-medium">Cancel</button>
+            <button @click="confirmClear()"
+              class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">Clear</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 @endsection
 
 @push('scripts')
