@@ -13,6 +13,8 @@ use App\Http\Controllers\Guest\GuestCartController;
 use App\Http\Controllers\Guest\GuestCheckoutController;
 use App\Models\CartItem;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
 // === Public Route ===
 Route::get('/', [HomeController::class, 'index'])->name('home');
