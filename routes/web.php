@@ -9,6 +9,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\User\CartController;
 use App\Http\Controllers\User\CheckoutController;
 use App\Http\Controllers\User\MyOrdersController;
+use App\Http\Controllers\Guest\GuestCartController; 
+use App\Http\Controllers\Guest\GuestCheckoutController; 
 use Illuminate\Support\Facades\Route;
 
 // === Public Route ===
@@ -94,6 +96,14 @@ Route::middleware(['auth', 'role:customer'])->prefix('user')->name('user.')->gro
         Route::put('/{review}', [\App\Http\Controllers\User\ReviewController::class, 'update'])->name('update');
         Route::delete('/{review}', [\App\Http\Controllers\User\ReviewController::class, 'destroy'])->name('destroy');
     });
+
+    Route::post('/cart/migrate', [CartController::class, 'migrateFromLocal'])->name('cart.migrate');
+});
+
+// === GUEST ROUTES (untuk pengguna tanpa login) ===
+Route::prefix('guest')->name('guest.')->group(function () {
+    // Guest Cart
+    Route::get('/cart', [GuestCartController::class, 'index'])->name('cart.index');
 });
 
 require __DIR__ . '/auth.php';
