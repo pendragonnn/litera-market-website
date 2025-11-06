@@ -22,17 +22,17 @@
               {{-- Detail Button --}}
               <button class="bg-[#002D72] text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-[#001E4D]"
                 data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-author="{{ $book->author }}"
-                data-description="{{ $book->description }}"
-                data-price="{{ $book->price ?? 0 }}" data-stock="{{ $book->stock }}"
-                data-image="{{ $book->image ?? asset('images/default-book.jpg') }}" onclick="openBookModal(this)">
+                data-description="{{ $book->description }}" data-price="{{ $book->price ?? 0 }}"
+                data-stock="{{ $book->stock }}" data-image="{{ $book->image ?? asset('images/default-book.jpg') }}"
+                onclick="openBookModal(this)">
                 Detail
               </button>
 
               {{-- Add to Cart Button --}}
               <button
                 class="add-to-cart bg-[#1B3C53] text-white text-sm font-medium px-3 py-2 rounded-md hover:bg-[#102a3e] transition disabled:opacity-50 disabled:cursor-not-allowed"
-                data-book-id="{{ $book->id }}" data-title="{{ $book->title }}"
-                data-price="{{ $book->price ?? 0 }}" data-image="{{ $book->image ?? asset('images/default-book.jpg') }}">
+                data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-price="{{ $book->price ?? 0 }}"
+                data-image="{{ $book->image ?? asset('images/default-book.jpg') }}">
                 🛒
               </button>
             </div>
@@ -250,6 +250,9 @@
       document.getElementById('bookModal').addEventListener('click', function (e) {
         if (e.target === this) closeBookModal();
       });
+
+      window.openBookModal = openBookModal;
+      window.closeBookModal = closeBookModal;
     });
   </script>
 @endpush
