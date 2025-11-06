@@ -17,6 +17,9 @@
             [x-cloak] {
                 display: none !important;
             }
+            html {
+                scroll-behavior: smooth;
+            }
         </style>
     </head>
     <body class="font-sans antialiased">
