@@ -121,6 +121,8 @@ Route::prefix('guest')->name('guest.')->group(function () {
     Route::post('/order/{token}/upload-proof', [GuestOrderTrackerController::class, 'uploadProof'])->name('order.tracker.upload');
     Route::patch('/order/{token}/cancel', [GuestOrderTrackerController::class, 'cancel'])->name('order.tracker.cancel');
     Route::patch('/order/{token}/complete', [GuestOrderTrackerController::class, 'complete'])->name('order.tracker.complete');
+    Route::post('/order-tracker/find-token', [GuestOrderTrackerController::class, 'findToken'])
+    ->name('order.tracker.findToken');
 });
 
 Route::middleware('auth:sanctum')->get('/cart/count', function (Request $request) {

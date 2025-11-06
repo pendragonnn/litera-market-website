@@ -18,7 +18,7 @@
       Thank you for shopping at <span class="font-semibold text-[#1B3C53]">LiteraMarket</span>.
     </p>
     <p class="text-gray-600 mb-6">
-      Please save your order token below — you’ll need it to track your order status.
+      Please save your order information below — you’ll need it to track your order or recover your token later.
     </p>
 
     {{-- ✅ Order Summary --}}
@@ -28,6 +28,7 @@
         <li><span class="font-semibold">Name:</span> {{ $order->name }}</li>
         <li><span class="font-semibold">Address:</span> {{ $order->address }}</li>
         <li><span class="font-semibold">WhatsApp Number:</span> {{ $order->phone }}</li>
+        <li><span class="font-semibold">Order ID:</span> {{ $order->id }}</li>
 
         <li>
           <span class="font-semibold">Order Token:</span>
@@ -43,7 +44,7 @@
             </button>
           </div>
           <p id="copyMsg" class="text-xs text-green-600 mt-1 hidden">✅ Token copied to clipboard!</p>
-          <p class="text-xs text-red-600 mt-1">⚠️ Keep this token safe! It’s required for order tracking.</p>
+          <p class="text-xs text-red-600 mt-1">⚠️ Keep this token and your Order ID safe! Both are required for order tracking or recovery.</p>
         </li>
       </ul>
     </div>

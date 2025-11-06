@@ -66,7 +66,7 @@ class GuestOrderTrackerController extends Controller
         $path = $request->file('payment_proof')->store('payments', 'public');
 
         $payment->update([
-            'payment_proof'  => $path,
+            'payment_proof' => $path,
             'payment_status' => 'Awaiting Approval',
         ]);
 
@@ -109,5 +109,26 @@ class GuestOrderTrackerController extends Controller
         $order->update(['status' => 'Delivered']);
 
         return back()->with('success', 'Order marked as delivered successfully.');
+    }
+
+    public function findToken(Request $request)
+    {
+        $request->validate([
+            'id_order' => 'required|string',
+            'phone' => 'required|string'
+        ]);
+
+        $order = Order::where('id', $request->id_order)
+            ->where('phone', $request->phone)
+            ->first();
+
+        if (!$order) {
+            return response()->json(['success' => false]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'token_order' => $order->token_order
+        ]);
     }
 }
