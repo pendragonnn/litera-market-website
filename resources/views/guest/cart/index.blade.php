@@ -4,8 +4,18 @@
   <div class="max-w-6xl mx-auto py-10 px-4" x-data="guestCart()" x-init="loadCart()">
 
     {{-- Title --}}
-    <h1 class="text-2xl font-bold text-[#1B3C53] mb-8 flex items-center gap-2">
-      🛒 <span>My Cart (Guest)</span>
+    <h1 class="text-2xl font-bold text-[#1B3C53] mb-8 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        🛒 <span>My Cart (Guest)</span>
+      </div>
+
+      <template x-if="items.length !== 0">
+        {{-- Back to Homepage Button --}}
+        <a href="{{ route('home') }}"
+          class="px-4 py-2 bg-[#1B3C53] text-white text-sm rounded-md hover:bg-[#163246] transition">
+          ← Back to Homepage
+        </a>
+      </template>
     </h1>
 
     {{-- Empty Cart --}}
@@ -29,13 +39,15 @@
                 class="w-full h-[450px] object-cover rounded-md border mb-3">
 
               <h3 class="text-[#1B3C53] font-semibold text-lg truncate" x-text="item.title"></h3>
-              <p class="text-gray-600 text-sm mb-2">Rp <span x-text="Number(item.price).toLocaleString('id-ID')"></span>
+              <p class="text-gray-600 text-sm mb-2">
+                Rp <span x-text="Number(item.price).toLocaleString('id-ID')"></span>
               </p>
 
               {{-- Quantity input --}}
               <div class="flex items-center gap-2 mb-2">
+                <label class="text-sm text-gray-700 font-medium">Quantity:</label>
                 <input type="number" min="1" x-model.number="item.quantity"
-                  class="w-16 border border-gray-300 rounded-md text-center text-sm py-1 focus:ring-[#d2c1b6] focus:border-[#d2c1b6]">
+                  class="w-16 border border-gray-300 rounded-md text-center text-sm py-1 px-2 focus:ring-[#d2c1b6] focus:border-[#d2c1b6]">
                 <button @click="updateItem(index)"
                   class="px-3 py-1 text-xs bg-[#1B3C53] text-white rounded hover:bg-[#163246]">
                   Update
