@@ -1,50 +1,105 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace Database\Seeders;
 
-return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+use Illuminate\Database\Seeder;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+
+class UserSeeder extends Seeder
+{
+    public function run(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 100);
-            $table->string('email', 100)->unique();
-            $table->string('password');
-            $table->string('phone', 20)->nullable();
-            $table->text('address')->nullable();
-            $table->enum('role', ['admin', 'customer'])->default('customer');
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        // Admin account
+        User::create([
+            'name' => 'Admin LiteraMarket',
+            'email' => 'admin@literamarket.com',
+            'password' => Hash::make('password'),
+            'phone' => '081234567890',
+            'address' => 'Jl. Buku Indah No. 42, Jakarta',
+            'role' => 'admin',
+        ]);
 
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
+        // Customer accounts
+        User::create([
+            'name' => 'John Doe',
+            'email' => 'johndoe@example.com',
+            'password' => Hash::make('password'),
+            'phone' => '089999999999',
+            'address' => 'Jl. Pelanggan Setia No. 5, Bandung',
+            'role' => 'customer',
+        ]);
 
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
-        });
+        User::create([
+            'name' => 'Jane Smith',
+            'email' => 'janesmith@example.com',
+            'password' => Hash::make('password'),
+            'phone' => '081212345678',
+            'address' => 'Jl. Mawar No. 10, Surabaya',
+            'role' => 'customer',
+        ]);
+
+        User::create([
+            'name' => 'Michael Tan',
+            'email' => 'michaeltan@example.com',
+            'password' => Hash::make('password'),
+            'phone' => '082134567890',
+            'address' => 'Jl. Melati No. 8, Medan',
+            'role' => 'customer',
+        ]);
+
+        User::create([
+            'name' => 'Sarah Johnson',
+            'email' => 'sarahjohnson@example.com',
+            'password' => Hash::make('password'),
+            'phone' => '081345678912',
+            'address' => 'Jl. Cendana No. 22, Yogyakarta',
+            'role' => 'customer',
+        ]);
+
+        User::create([
+            'name' => 'David Lee',
+            'email' => 'davidlee@example.com',
+            'password' => Hash::make('password'),
+            'phone' => '083123456789',
+            'address' => 'Jl. Anggrek No. 3, Semarang',
+            'role' => 'customer',
+        ]);
+
+        User::create([
+            'name' => 'Linda Park',
+            'email' => 'lindapark@example.com',
+            'password' => Hash::make('password'),
+            'phone' => '085612345678',
+            'address' => 'Jl. Dahlia No. 14, Makassar',
+            'role' => 'customer',
+        ]);
+
+        User::create([
+            'name' => 'Robert Wilson',
+            'email' => 'robertwilson@example.com',
+            'password' => Hash::make('password'),
+            'phone' => '081998877665',
+            'address' => 'Jl. Kenanga No. 2, Bali',
+            'role' => 'customer',
+        ]);
+
+        User::create([
+            'name' => 'Emily Davis',
+            'email' => 'emilydavis@example.com',
+            'password' => Hash::make('password'),
+            'phone' => '087712345678',
+            'address' => 'Jl. Sakura No. 18, Malang',
+            'role' => 'customer',
+        ]);
+
+        User::create([
+            'name' => 'Kevin Hartono',
+            'email' => 'kevinhartono@example.com',
+            'password' => Hash::make('password'),
+            'phone' => '081276543210',
+            'address' => 'Jl. Merpati No. 6, Palembang',
+            'role' => 'customer',
+        ]);
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
-    }
-};
+}
