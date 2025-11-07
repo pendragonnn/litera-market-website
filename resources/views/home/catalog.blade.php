@@ -1,13 +1,14 @@
 <section id="ourCollection" class="container mx-auto px-6 mb-16">
   <h3 class="text-center text-2xl font-bold text-[#1B3C53] mb-3">Our Collection</h3>
   <p class="text-center text-gray-600 mb-8">Find a wide selection of interesting books only at LiteraMarket.</p>
-
   <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
     @forelse ($books as $book)
       <div
         class="border border-gray-300 bg-[#f9f9f9] flex flex-col items-center shadow-sm rounded-md hover:shadow-md transition-all">
         <div class="w-full h-120 border-b border-gray-300 flex justify-center items-center bg-white rounded-t-md">
-          <img src="{{ $book->image ?? asset('images/default-book.jpg') }}" alt="{{ $book->title }}"
+          <img src="{{ $book->image
+            ? asset($book->image)
+            : 'https://placehold.co/200x250?text=No+Image' }}" alt="{{ $book->title }}" alt="{{ $book->title }}"
             class="h-full object-contain">
         </div>
 
@@ -15,12 +16,16 @@
           <div>
             <h4 class="text-sm font-bold text-gray-800 truncate">{{ $book->title }}</h4>
             <p class="text-sm text-gray-600">{{ $book->author }}</p>
+            <span class="text-[#C0392B] font-semibold text-sm">
+              Rp {{ number_format($book->price ?? 51000, 0, ',', '.') }}
+            </span>
           </div>
 
-          <div class="flex justify-between items-center mt-3">
-            <div class="flex gap-1">
+          <div class="flex mt-3">
+            <div class="flex justify-between items-center gap-2 sm:gap-3 flex-wrap">
               {{-- Detail Button --}}
-              <button class="bg-[#002D72] text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-[#001E4D]"
+              <button
+                class="bg-[#002D72] text-white text-xs sm:text-sm md:text-base font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-[#001E4D] transition"
                 data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-author="{{ $book->author }}"
                 data-description="{{ $book->description }}" data-price="{{ $book->price ?? 0 }}"
                 data-stock="{{ $book->stock }}" data-image="{{ $book->image ?? asset('images/default-book.jpg') }}"
@@ -28,18 +33,21 @@
                 Detail
               </button>
 
-              {{-- Add to Cart Button --}}
-              <button
-                class="add-to-cart bg-[#1B3C53] text-white text-sm font-medium px-3 py-2 rounded-md hover:bg-[#102a3e] transition disabled:opacity-50 disabled:cursor-not-allowed"
-                data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-price="{{ $book->price ?? 0 }}"
-                data-image="{{ $book->image ?? asset('images/default-book.jpg') }}">
-                🛒
-              </button>
+              {{-- Add to Cart Button (hidden if out of stock) --}}
+              @if ($book->stock > 0)
+                <button
+                  class="add-to-cart bg-[#1B3C53] text-white text-xs sm:text-sm md:text-base font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-[#102a3e] transition"
+                  data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-price="{{ $book->price ?? 0 }}"
+                  data-image="{{ $book->image ?? asset('images/default-book.jpg') }}">
+                  🛒
+                </button>
+              @else
+                <span
+                  class="italic text-red-600 text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 py-1.5 rounded-md font-medium whitespace-nowrap">
+                  Out of Stock
+                </span>
+              @endif
             </div>
-
-            <span class="text-[#C0392B] font-semibold text-sm">
-              Rp {{ number_format($book->price ?? 51000, 0, ',', '.') }}
-            </span>
           </div>
         </div>
       </div>
@@ -70,35 +78,59 @@
 </div>
 
 {{-- === Book Detail Modal === --}}
-<div id="bookModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+<div id="bookModal"
+  class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 transition-all duration-300 ease-out">
   <div
-    class="bg-white rounded-xl shadow-2xl w-[90%] max-w-3xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300"
+    class="bg-white rounded-2xl shadow-2xl w-[92%] sm:w-[85%] lg:w-[70%] max-w-4xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300"
     id="bookModalBox">
-    <div class="flex justify-between items-center border-b border-gray-200 px-6 py-4 bg-[#F9F3EF]">
-      <h2 class="text-lg font-semibold text-[#1B3C53]" id="modalBookTitle">Book Title</h2>
-      <button onclick="closeBookModal()" class="text-[#1B3C53]/70 hover:text-[#1B3C53] text-lg font-bold">✕</button>
+
+    {{-- Header --}}
+    <div class="flex justify-between items-center border-b border-gray-200 px-5 sm:px-8 py-4 bg-[#F9F3EF]">
+      <h2 class="text-lg sm:text-xl md:text-2xl font-semibold text-[#1B3C53]" id="modalBookTitle">Book Title</h2>
+      <button onclick="closeBookModal()"
+        class="text-[#1B3C53]/70 hover:text-[#1B3C53] text-lg sm:text-xl font-bold transition duration-150">
+        ✕
+      </button>
     </div>
-    <div class="grid md:grid-cols-2 gap-6 p-6 items-center">
-      <div class="flex justify-center">
+
+    {{-- Body --}}
+    <div class="grid md:grid-cols-2 gap-6 p-5 sm:p-8 items-center">
+      {{-- Image Section --}}
+      <div class="flex justify-center items-center">
         <img id="modalBookImage" src="{{ asset('images/default-book.jpg') }}" alt="Book Image"
-          class="h-64 object-contain rounded-md">
+          class="h-56 sm:h-72 md:h-80 object-contain rounded-lg shadow-sm transition-transform duration-300 hover:scale-105">
       </div>
+
+      {{-- Info Section --}}
       <div>
-        <h3 class="font-bold text-[#1B3C53] text-xl mb-1" id="modalBookTitleText">Book Title</h3>
-        <p class="text-gray-600 text-sm mb-3" id="modalBookAuthor">Author Name</p>
-        <p class="text-sm text-gray-700 mb-4" id="modalBookDescription">Description of the book goes here.</p>
-        <p class="font-semibold text-[#C0392B] mb-2">
+        <h3 class="font-bold text-[#1B3C53] text-lg sm:text-xl md:text-2xl mb-1" id="modalBookTitleText">Book Title</h3>
+        <p class="text-gray-600 text-sm sm:text-base mb-3" id="modalBookAuthor">Author Name</p>
+
+        <p class="text-sm sm:text-base md:text-[15px] text-gray-700 leading-relaxed mb-4" id="modalBookDescription">
+          Description of the book goes here.
+        </p>
+
+        <p class="font-semibold text-[#C0392B] mb-2 text-base sm:text-lg">
           Rp <span id="modalBookPrice">0</span>
         </p>
-        <p class="text-sm text-gray-500 mb-4">
-          Stock: <span id="modalBookStock">0</span>
+
+        <p class="text-sm sm:text-base text-gray-500 mb-5">
+          Stock: <span id="modalBookStock" class="font-medium text-[#1B3C53]">0</span>
         </p>
-        <div class="flex gap-3">
+
+        {{-- Buttons --}}
+        <div class="flex flex-wrap gap-3">
           <button id="modalAddToCart"
-            class="bg-[#1B3C53] text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-[#102a3e] transition">
+            class="bg-[#1B3C53] text-white text-sm sm:text-base font-medium px-4 sm:px-6 py-2 sm:py-2.5 rounded-md hover:bg-[#102a3e] transition">
             🛒 Add to Cart
           </button>
         </div>
+
+        {{-- Out of Stock Notice --}}
+        <p id="modalOutOfStock"
+          class="hidden mt-4 text-sm sm:text-base text-red-600 bg-red-50 border border-red-200 rounded-md px-4 py-2">
+          ❌ This book is currently out of stock.
+        </p>
       </div>
     </div>
   </div>
@@ -215,6 +247,9 @@
       function openBookModal(button) {
         const modal = document.getElementById('bookModal');
         const modalBox = document.getElementById('bookModalBox');
+        const addToCartBtn = document.getElementById('modalAddToCart');
+        const outOfStockMsg = document.getElementById('modalOutOfStock');
+
         document.getElementById('modalBookTitle').textContent = button.dataset.title;
         document.getElementById('modalBookTitleText').textContent = button.dataset.title;
         document.getElementById('modalBookAuthor').textContent = button.dataset.author || 'Unknown Author';
@@ -223,18 +258,26 @@
         document.getElementById('modalBookStock').textContent = button.dataset.stock;
         document.getElementById('modalBookImage').src = button.dataset.image;
 
+        const stock = parseInt(button.dataset.stock || 0);
+
+        if (stock <= 0) {
+          addToCartBtn.disabled = true;
+          addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+          addToCartBtn.innerHTML = 'Out of Stock';
+          outOfStockMsg.classList.remove('hidden');
+        } else {
+          addToCartBtn.disabled = false;
+          addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          addToCartBtn.innerHTML = '🛒 Add to Cart';
+          outOfStockMsg.classList.add('hidden');
+        }
+
         modal.classList.remove('hidden');
         setTimeout(() => {
           modal.classList.add('flex');
           modalBox.classList.add('opacity-100', 'scale-100');
           modalBox.classList.remove('opacity-0', 'scale-95');
         }, 10);
-
-        const addToCartBtn = document.getElementById('modalAddToCart');
-        addToCartBtn.onclick = () => {
-          document.querySelector(`[data-book-id="${button.dataset.bookId}"].add-to-cart`).click();
-          closeBookModal();
-        };
       }
 
       function closeBookModal() {
