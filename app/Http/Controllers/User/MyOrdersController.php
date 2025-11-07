@@ -26,11 +26,11 @@ class MyOrdersController extends Controller
 
         // Pisahkan berdasarkan status
         $groupedOrders = [
-            'Pending'    => $orders->where('status', 'Pending'),
-            'Processed'  => $orders->where('status', 'Processed'),
-            'Shipped'    => $orders->where('status', 'Shipped'),
-            'Delivered'  => $orders->where('status', 'Delivered'),
-            'Cancelled'  => $orders->where('status', 'Cancelled'),
+            'Pending' => $orders->where('status', 'Pending'),
+            'Processed' => $orders->where('status', 'Processed'),
+            'Shipped' => $orders->where('status', 'Shipped'),
+            'Delivered' => $orders->where('status', 'Delivered'),
+            'Cancelled' => $orders->where('status', 'Cancelled'),
         ];
 
         return view('user.orders.index', compact('groupedOrders'));
@@ -49,11 +49,17 @@ class MyOrdersController extends Controller
             return back()->with('error', 'You can only cancel pending or processed orders.');
         }
 
-        // dd($order);
+        // 🔁 Kembalikan stok setiap buku dalam order
+        $order->load('orderItems.book'); // pastikan relasi sudah diload
+
+        foreach ($order->orderItems as $item) {
+            if ($item->book) {
+                $item->book->increment('stock', $item->quantity);
+            }
+        }
 
         $order->update(['status' => 'Cancelled']);
 
-        // Update payment status jika ada
         if ($order->payment) {
             $order->payment->update(['payment_status' => 'Rejected']);
         }
@@ -103,7 +109,7 @@ class MyOrdersController extends Controller
 
         // Update payment & order status
         $payment->update([
-            'payment_proof'  => $path,
+            'payment_proof' => $path,
             'payment_status' => 'Awaiting Approval',
         ]);
 

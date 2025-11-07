@@ -37,11 +37,11 @@
                 <div class="flex gap-2">
                   {{-- Edit Review --}}
                   <button @click="$dispatch('open-review', { 
-                                  mode:'edit', 
-                                  reviewId: {{ $item->review->id }}, 
-                                  rating: {{ $item->review->rating }}, 
-                                  comment: @js($item->review->comment) 
-                                }); modal='review';"
+                                              mode:'edit', 
+                                              reviewId: {{ $item->review->id }}, 
+                                              rating: {{ $item->review->rating }}, 
+                                              comment: @js($item->review->comment) 
+                                            }); modal='review';"
                     class="px-3 py-1 text-xs bg-[#1B3C53] text-white rounded hover:bg-[#163246]">
                     Edit
                   </button>
@@ -56,11 +56,11 @@
             @else
               {{-- Belum ada review --}}
               <button @click="$dispatch('open-review', { 
-                              mode:'create', 
-                              orderItemId: {{ $item->id }}, 
-                              rating: 0, 
-                              comment: '' 
-                            }); modal='review';"
+                                          mode:'create', 
+                                          orderItemId: {{ $item->id }}, 
+                                          rating: 0, 
+                                          comment: '' 
+                                        }); modal='review';"
                 class="mt-2 px-3 py-1 text-xs bg-[#1B3C53] text-white rounded hover:bg-[#163246]">
                 Write Review
               </button>
@@ -92,15 +92,26 @@
 
       {{-- === Processed Actions === --}}
       @if ($order->status === 'Processed')
-        <a href="https://wa.me/6281234567890?text=Halo%20admin%2C%20saya%20ingin%20menanyakan%20status%20pesanan%20#{{ $order->id }}"
-          target="_blank" class="px-3 py-1 text-xs bg-green-600 text-white rounded-md hover:bg-green-700">
-          Contact Admin
-        </a>
-        <button @click="modal = 'cancel'; orderId = {{ $order->id }}"
-          class="px-3 py-1 text-xs bg-red-600 text-white rounded-md hover:bg-red-700">
-          Cancel
-        </button>
+        <div class="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-start">
+          {{-- Contact Admin via WhatsApp --}}
+          @php
+            $adminNumber = '6281234567890';
+            $waMessage = urlencode("Halo admin, saya ingin menanyakan status pembayaran untuk pesanan dengan ID #{$order->id} atas nama {$order->name}. Mohon dicek kembali bukti pembayaran saya. Terima kasih 🙏");
+          @endphp
+
+          <a href="https://wa.me/{{ $adminNumber }}?text={{ $waMessage }}" target="_blank"
+            class="inline-flex items-center gap-1 px-3 py-1 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 transition">
+            Contact Admin
+          </a>
+
+          {{-- Cancel Order --}}
+          <button @click="modal = 'cancel'; orderId = {{ $order->id }}"
+            class="px-3 py-1 text-xs bg-red-600 text-white rounded-md hover:bg-red-700 transition">
+            Cancel
+          </button>
+        </div>
       @endif
+
 
       {{-- === Shipped Actions === --}}
       @if ($order->status === 'Shipped')
@@ -111,4 +122,14 @@
       @endif
     </div>
   </div>
+
+  @if ($order->status === 'Processed')
+    {{-- Info for user --}}
+    <div
+      class="mt-3 bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs rounded-md px-4 py-3 leading-relaxed shadow-sm">
+      ⚠️ <span class="font-medium">Note:</span> If your payment proof hasn't been verified within <span
+        class="font-semibold text-[#1B3C53]">24 hours</span>,
+      please contact our admin through WhatsApp for faster confirmation.
+    </div>
+  @endif
 </div>
