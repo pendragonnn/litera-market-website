@@ -80,19 +80,30 @@ class GuestOrderTrackerController extends Controller
      */
     public function cancel($token)
     {
-        $order = Order::where('token_order', $token)->with('payment')->firstOrFail();
+        $order = Order::where('token_order', $token)
+            ->with(['payment', 'orderItems.book'])
+            ->firstOrFail();
 
+        // Validasi status
         if (!in_array($order->status, ['Pending', 'Processed'])) {
             return back()->with('error', 'You can only cancel pending or processed orders.');
         }
 
+        // Kembalikan stok setiap buku di order
+        foreach ($order->orderItems as $item) {
+            if ($item->book) {
+                $item->book->increment('stock', $item->quantity);
+            }
+        }
+
+        // Update status order dan payment
         $order->update(['status' => 'Cancelled']);
 
         if ($order->payment) {
             $order->payment->update(['payment_status' => 'Rejected']);
         }
 
-        return back()->with('success', 'Order has been cancelled successfully.');
+        return back()->with('success', 'Order has been cancelled successfully, and item stock has been restored.');
     }
 
     /**

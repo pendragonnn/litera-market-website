@@ -10,9 +10,10 @@
 
     {{-- === Notification Toast (Consistent with Cart Modal) === --}}
     @if (session('success') || session('error'))
-      <div x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 3000)" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md
-                                  rounded-xl shadow-xl border border-[#d2c1b6]/70 bg-[#F9F3EF]
-                                  text-[#1B3C53] text-sm font-medium px-5 py-4 flex justify-between items-center">
+      <div x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 3000)"
+        class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md
+                                                          rounded-xl shadow-xl border border-[#d2c1b6]/70 bg-[#F9F3EF]
+                                                          text-[#1B3C53] text-sm font-medium px-5 py-4 flex justify-between items-center">
 
         {{-- Message --}}
         <span>{{ session('success') ?? session('error') }}</span>
@@ -34,9 +35,9 @@
         <li><span class="font-semibold">Address:</span> {{ $order->address }}</li>
         <li><span class="font-semibold">Status:</span>
           <span class="font-semibold {{ 
-                    $order->status === 'Cancelled' ? 'text-red-600' :
+                                $order->status === 'Cancelled' ? 'text-red-600' :
     ($order->status === 'Delivered' ? 'text-green-700' : 'text-yellow-700')
-                  }}">
+                              }}">
             {{ ucfirst($order->status) }}
           </span>
         </li>
@@ -60,16 +61,25 @@
     {{-- Payment Info --}}
     <div class="border border-gray-200 rounded-lg p-5 bg-white shadow-sm mb-6">
       <h3 class="font-semibold text-[#1B3C53] mb-3">Payment Information</h3>
-      <p class="text-sm text-gray-700 mb-2"><span class="font-semibold">Method:</span>
-        {{ $order->payment->payment_method }}</p>
-      <p class="text-sm text-gray-700 mb-4"><span class="font-semibold">Status:</span>
-        {{ $order->payment->payment_status }}</p>
+      <p class="text-sm text-gray-700 mb-2">
+        <span class="font-semibold">Method:</span> {{ $order->payment->payment_method }}
+      </p>
+      <p class="text-sm text-gray-700 mb-4">
+        <span class="font-semibold">Status:</span> {{ $order->payment->payment_status }}
+      </p>
 
       {{-- === Payment Section === --}}
       @if ($order->payment)
 
-        {{-- ✅ CASE 1: Sudah upload proof --}}
-        @if ($order->payment->payment_proof)
+        {{-- 🚫 CASE 0: Order dibatalkan oleh user --}}
+        @if ($order->status === 'Cancelled')
+          <div class="bg-red-50 border border-red-300 rounded-md p-4 mb-4 text-sm text-red-700">
+            <p class="font-semibold mb-1">❌ Order Cancelled</p>
+            <p>This order has been cancelled. You can no longer upload or manage payment proofs.</p>
+          </div>
+
+          {{-- 🧾 CASE 1: Sudah upload proof --}}
+        @elseif ($order->payment->payment_proof)
 
           {{-- 🕓 CASE 1a: Masih menunggu approval --}}
           @if ($order->payment->payment_status === 'Awaiting Approval')
@@ -87,12 +97,20 @@
                 Thank you for completing your purchase!</p>
             </div>
 
-            {{-- ❌ CASE 1c: Payment proof ditolak --}}
+            {{-- ❌ CASE 1c: Bukti pembayaran ditolak oleh admin --}}
           @elseif ($order->payment->payment_status === 'Rejected')
             <div class="bg-red-50 border border-red-300 rounded-md p-4 mb-4 text-sm text-red-800">
               <p class="font-semibold mb-1">❌ Payment proof rejected</p>
-              <p>Your uploaded payment proof was not approved. Please upload a new valid proof below.</p>
+              <p>Your payment proof was not approved by our admin team.<br>
+                Please upload a new valid proof below to continue processing your order.</p>
 
+              {{-- ⚠️ Additional Note --}}
+              <div class="mt-5 bg-yellow-50 border border-yellow-300 rounded-md p-3 text-xs text-yellow-800">
+                ⚠️ <span class="font-semibold">Important:</span> If you do not complete your payment within
+                <span class="font-semibold">1 day</span>, your order will be automatically cancelled by our admin.
+              </div>
+
+              {{-- Form re-upload proof (karena status balik ke Pending) --}}
               <form action="{{ route('guest.order.tracker.upload', $order->token_order) }}" method="POST"
                 enctype="multipart/form-data" class="mt-3">
                 @csrf
@@ -106,7 +124,7 @@
             </div>
           @endif
 
-          {{-- 💸 CASE 2: Belum ada payment proof sama sekali --}}
+          {{-- 💸 CASE 2: Belum upload payment proof sama sekali --}}
         @else
           <form action="{{ route('guest.order.tracker.upload', $order->token_order) }}" method="POST"
             enctype="multipart/form-data">
@@ -117,10 +135,17 @@
             <button type="submit" class="px-5 py-2 bg-[#1B3C53] text-white rounded-md hover:bg-[#163246] text-sm font-medium">
               Upload Proof
             </button>
+
+            {{-- ⚠️ Additional Note --}}
+            <div class="mt-5 bg-yellow-50 border border-yellow-300 rounded-md p-3 text-xs text-yellow-800">
+              ⚠️ <span class="font-semibold">Important:</span> If you do not complete your payment within
+              <span class="font-semibold">1 day</span>, your order will be automatically cancelled by our admin.
+            </div>
           </form>
         @endif
       @endif
     </div>
+
 
     {{-- === Review Info Notice for Guests === --}}
     @if ($order->status === 'Delivered')
@@ -132,7 +157,6 @@
         </p>
       </div>
     @endif
-
 
     {{-- Action Buttons --}}
     <div class="flex flex-wrap gap-3">
