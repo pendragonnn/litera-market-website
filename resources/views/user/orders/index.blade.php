@@ -2,35 +2,44 @@
 
 @section('content')
   <div class="max-w-6xl mx-auto py-10 px-4" x-data="{
-                tab: new URLSearchParams(window.location.search).get('tab') || 'All', 
-                modal: null, 
-                orderId: null,
-                orderItemId: null,
-                reviewMode: 'create',
-                reviewId: null,
-                setTab(status) {
-                  this.tab = status;
-                  const url = new URL(window.location.href);
-                  url.searchParams.set('tab', status);
-                  window.history.pushState({}, '', url);
-                }
-              }" x-init="
-                $watch('tab', value => {
-                  const url = new URL(window.location.href);
-                  url.searchParams.set('tab', value);
-                  window.history.replaceState({}, '', url);
-                });
-              ">
+                  tab: new URLSearchParams(window.location.search).get('tab') || 'All', 
+                  modal: null, 
+                  orderId: null,
+                  orderItemId: null,
+                  reviewMode: 'create',
+                  reviewId: null,
+                  setTab(status) {
+                    this.tab = status;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('tab', status);
+                    window.history.pushState({}, '', url);
+                  }
+                }" x-init="
+                  $watch('tab', value => {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('tab', value);
+                    window.history.replaceState({}, '', url);
+                  });
+                ">
 
-    <h1 class="text-2xl font-bold text-[#1B3C53] mb-8 flex items-center gap-2">
-      📦 <span>My Orders</span>
+    <h1
+      class="text-2xl font-bold text-[#1B3C53] mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        📦 <span>My Orders</span>
+      </div>
+
+      {{-- Back to Homepage --}}
+      <a href="{{ route('home') }}"
+        class="px-4 py-2 bg-[#1B3C53] text-white text-sm rounded-md hover:bg-[#163246] transition shadow-sm flex items-center gap-1">
+        ← <span>Back to Homepage</span>
+      </a>
     </h1>
 
     {{-- === Notification Toast (Consistent with Cart Modal) === --}}
     @if (session('success') || session('error'))
       <div x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 3000)" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md
-                   rounded-xl shadow-xl border border-[#d2c1b6]/70 bg-[#F9F3EF]
-                   text-[#1B3C53] text-sm font-medium px-5 py-4 flex justify-between items-center">
+                       rounded-xl shadow-xl border border-[#d2c1b6]/70 bg-[#F9F3EF]
+                       text-[#1B3C53] text-sm font-medium px-5 py-4 flex justify-between items-center">
         {{-- Message --}}
         <span>{{ session('success') ?? session('error') }}</span>
 
@@ -45,8 +54,8 @@
     <div class="flex flex-wrap gap-2 mb-6">
       @foreach (['All', 'Pending', 'Processed', 'Shipped', 'Delivered', 'Cancelled'] as $status)
         <button @click="setTab('{{ $status }}')" :class="tab === '{{ $status }}' 
-                                  ? 'bg-[#1B3C53] text-white' 
-                                  : 'bg-white text-[#1B3C53] border border-[#1B3C53]'"
+                                      ? 'bg-[#1B3C53] text-white' 
+                                      : 'bg-white text-[#1B3C53] border border-[#1B3C53]'"
           class="px-4 py-2 rounded-md font-medium text-sm transition-all">
           {{ $status }}
         </button>
@@ -136,19 +145,19 @@
     {{-- === Review Modal (Create / Edit) === --}}
     <div x-show="modal === 'review'" x-cloak class="fixed inset-0 flex items-center justify-center bg-black/40 z-50"
       x-data="{ currentRating: 0, currentComment: '' }" @open-review.window="
-            reviewMode = $event.detail.mode;
-            orderItemId    = $event.detail.orderItemId ?? null;
-            reviewId   = $event.detail.reviewId ?? null;
-            currentRating  = Number($event.detail.rating ?? 0);
-            currentComment = $event.detail.comment ?? '';
-          ">
+              reviewMode = $event.detail.mode;
+              orderItemId    = $event.detail.orderItemId ?? null;
+              reviewId   = $event.detail.reviewId ?? null;
+              currentRating  = Number($event.detail.rating ?? 0);
+              currentComment = $event.detail.comment ?? '';
+            ">
       <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
         <h3 class="text-lg font-semibold text-[#1B3C53] mb-4"
           x-text="reviewMode === 'create' ? 'Write a Review' : 'Edit Review'"></h3>
 
         <form method="POST" x-bind:action="reviewMode === 'create' 
-                    ? `/user/reviews/${orderItemId}` 
-                    : `/user/reviews/${reviewId}`">
+                      ? `/user/reviews/${orderItemId}` 
+                      : `/user/reviews/${reviewId}`">
           @csrf
           <template x-if="reviewMode === 'edit'">
             <input type="hidden" name="_method" value="PUT">
@@ -195,8 +204,7 @@
           @csrf
           @method('DELETE')
           <div class="flex justify-center gap-4">
-            <button type="button" @click="modal = null"
-              class="px-4 py-1 border rounded text-sm text-[#1B3C53] ">
+            <button type="button" @click="modal = null" class="px-4 py-1 border rounded text-sm text-[#1B3C53] ">
               Cancel
             </button>
 
