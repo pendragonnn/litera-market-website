@@ -45,7 +45,7 @@
       @endguest
 
       @auth
-        <a href="{{ route('user.user.orders.index') }}"
+        <a href="{{ route('user.orders.index') }}"
           class="text-gray-700 border border-gray-400 rounded-md px-3 py-1 hover:bg-gray-100 text-sm font-medium">
           📦 My Orders
         </a>
@@ -134,7 +134,7 @@
       @endguest
 
       @auth
-        <a href="{{ route('user.user.orders.index') }}"
+        <a href="{{ route('user.orders.index') }}"
           class="block border border-gray-300 rounded-md px-3 py-2 text-gray-700 hover:bg-gray-50">
           📦 My Orders
         </a>
