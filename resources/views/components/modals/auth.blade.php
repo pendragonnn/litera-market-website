@@ -1,5 +1,26 @@
 {{-- === Modal Section === --}}
 @section('modals')
+
+  {{-- === Toast Notification (Reusable for Login/Register) === --}}
+  @if (session('success') || session('error'))
+    <div x-data="{ show: true }" x-show="show" x-transition
+      x-init="setTimeout(() => show = false, 3000)"
+      class="fixed top-5 left-1/2 transform -translate-x-1/2 z-[60] w-[90%] max-w-md
+             rounded-xl shadow-xl border border-[#d2c1b6]/70
+             {{ session('success') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800' }}
+             text-sm font-medium px-5 py-4 flex justify-between items-center">
+      
+      <span>
+        {{ session('success') ?? session('error') }}
+      </span>
+
+      <button class="ml-3 font-bold text-[#1B3C53]/60 hover:text-[#1B3C53]" @click="show = false">
+        ✕
+      </button>
+    </div>
+  @endif
+
+
   {{-- === Login Modal === --}}
   <div id="loginModal" class="fixed inset-0 z-50 hidden bg-black/40 flex justify-center items-start pt-16">
     <div class="bg-white border border-gray-800 rounded-lg w-full max-w-sm relative overflow-hidden">
@@ -36,7 +57,8 @@
     </div>
   </div>
 
-  {{-- === Register Modal (Bordered Version) === --}}
+
+  {{-- === Register Modal === --}}
   <div id="registerModal" class="fixed inset-0 z-50 hidden bg-black/40 flex justify-center items-start pt-16">
     <div class="bg-white border border-gray-800 rounded-lg w-full max-w-sm relative overflow-hidden">
       <button onclick="toggleModal('registerModal')"
@@ -83,12 +105,14 @@
   </div>
 @endsection
 
+
 @push('scripts')
   <script>
     function toggleModal(id) {
       const modal = document.getElementById(id);
       modal.classList.toggle('hidden');
     }
+
     function switchModal(from, to) {
       document.getElementById(from).classList.add('hidden');
       document.getElementById(to).classList.remove('hidden');
