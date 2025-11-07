@@ -7,8 +7,8 @@
         class="border border-gray-300 bg-[#f9f9f9] flex flex-col items-center shadow-sm rounded-md hover:shadow-md transition-all">
         <div class="w-full h-120 border-b border-gray-300 flex justify-center items-center bg-white rounded-t-md">
           <img src="{{ $book->image
-            ? asset($book->image)
-            : 'https://placehold.co/200x250?text=No+Image' }}" alt="{{ $book->title }}" alt="{{ $book->title }}"
+      ? asset($book->image)
+      : 'https://placehold.co/200x250?text=No+Image' }}" alt="{{ $book->title }}" alt="{{ $book->title }}"
             class="h-full object-contain">
         </div>
 
@@ -38,7 +38,7 @@
                 <button
                   class="add-to-cart bg-[#1B3C53] text-white text-xs sm:text-sm md:text-base font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-[#102a3e] transition"
                   data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-price="{{ $book->price ?? 0 }}"
-                  data-image="{{ $book->image ?? asset('images/default-book.jpg') }}">
+                  data-stock="{{ $book->stock }}" data-image="{{ $book->image ?? asset('images/default-book.jpg') }}">
                   🛒
                 </button>
               @else
@@ -193,18 +193,25 @@
           const image = this.dataset.image;
 
           if (!isLoggedIn) {
-            // === Guest: save to localStorage ===
+            const stock = Number(this.dataset.stock) || 0;
             const cart = JSON.parse(localStorage.getItem('guest_cart') || '[]');
             const existing = cart.find(i => i.book_id === bookId);
+
             if (existing) {
-              existing.quantity += 1;
+              if (existing.stock > 0 && existing.quantity < existing.stock) {
+                existing.quantity += 1;
+                showAlert(`"${title}" added to your cart!`, 'success');
+              } else {
+                showAlert(`"${title}" is at maximum available stock (${existing.stock}).`, 'error');
+              }
             } else {
-              cart.push({ book_id: bookId, title, price, quantity: 1, image });
+              cart.push({ book_id: bookId, title, price, quantity: 1, image, stock });
+              showAlert(`"${title}" added to your cart!`, 'success');
             }
+
             localStorage.setItem('guest_cart', JSON.stringify(cart));
             const totalCount = cart.reduce((sum, i) => sum + i.quantity, 0);
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: totalCount } }));
-            showAlert(`"${title}" added to your cart!`, 'success');
             return;
           }
 

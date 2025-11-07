@@ -10,7 +10,6 @@
       </div>
 
       <template x-if="items.length !== 0">
-        {{-- Back to Homepage Button --}}
         <a href="{{ route('home') }}"
           class="px-4 py-2 bg-[#1B3C53] text-white text-sm rounded-md hover:bg-[#163246] transition">
           ← Back to Homepage
@@ -34,7 +33,17 @@
       <div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
           <template x-for="(item, index) in items" :key="item.book_id">
-            <div class="bg-gray-50 border border-gray-300 rounded-md p-3 shadow-sm hover:shadow-md transition">
+            <div class="relative bg-gray-50 border border-gray-300 rounded-md p-3 shadow-sm hover:shadow-md transition"
+              :class="{ 'opacity-80': item.stock <= 0 }">
+
+              {{-- Out of Stock Badge --}}
+              <template x-if="item.stock <= 0">
+                <span
+                  class="absolute top-3 left-3 bg-red-600 text-white text-xs px-2 py-1 rounded-md font-semibold shadow">
+                  Out of Stock
+                </span>
+              </template>
+
               <img :src="item.image || 'https://placehold.co/200x250?text=No+Image'"
                 class="w-full h-[450px] object-cover rounded-md border mb-3">
 
@@ -43,18 +52,20 @@
                 Rp <span x-text="Number(item.price).toLocaleString('id-ID')"></span>
               </p>
 
-              {{-- Quantity input --}}
+              {{-- Quantity Input --}}
               <div class="flex items-center gap-2 mb-2">
                 <label class="text-sm text-gray-700 font-medium">Quantity:</label>
-                <input type="number" min="1" x-model.number="item.quantity"
-                  class="w-16 border border-gray-300 rounded-md text-center text-sm py-1 px-2 focus:ring-[#d2c1b6] focus:border-[#d2c1b6]">
+                <input type="number" min="1" :max="item.stock || 99" x-model.number="item.quantity"
+                  class="w-16 border border-gray-300 rounded-md text-center text-sm py-1 px-2 focus:ring-[#d2c1b6] focus:border-[#d2c1b6]"
+                  :disabled="item.stock <= 0">
                 <button @click="updateItem(index)"
-                  class="px-3 py-1 text-xs bg-[#1B3C53] text-white rounded hover:bg-[#163246]">
+                  class="px-3 py-1 text-xs bg-[#1B3C53] text-white rounded hover:bg-[#163246]"
+                  :disabled="item.stock <= 0">
                   Update
                 </button>
               </div>
 
-              {{-- Delete button --}}
+              {{-- Delete Button --}}
               <button type="button"
                 class="w-full mt-1 px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
                 @click="openDeleteModal(index)">
@@ -65,10 +76,19 @@
         </div>
 
         {{-- Cart Summary --}}
-        <div class="flex justify-between items-center mt-8">
-          <h2 class="text-xl font-bold text-[#1B3C53]">
-            Total: Rp <span x-text="totalPrice.toLocaleString('id-ID')"></span>
-          </h2>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-8 gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-[#1B3C53]">
+              Total: Rp <span x-text="totalPrice.toLocaleString('id-ID')"></span>
+            </h2>
+
+            {{-- Warning if out of stock --}}
+            <template x-if="hasOutOfStock()">
+              <p class="text-red-600 text-sm mt-2 font-medium">
+                ⚠️ Some items are out of stock. Please remove them before checkout.
+              </p>
+            </template>
+          </div>
 
           <div class="flex items-center gap-3">
             {{-- Clear Cart --}}
@@ -80,15 +100,20 @@
 
             {{-- Checkout --}}
             <a href="{{ route('guest.checkout.index') }}"
-              class="px-5 py-2 bg-[#1B3C53] text-white rounded-md hover:bg-[#163246] text-sm font-medium">
+              class="px-5 py-2 bg-[#1B3C53] text-white rounded-md text-sm font-medium transition"
+              :class="{ 'opacity-50 cursor-not-allowed': hasOutOfStock() }" @click="if (hasOutOfStock()) { 
+              showStockWarning('Some items are out of stock. Please remove them before checkout.'); 
+              $event.preventDefault(); 
+            }">
               Checkout as Guest
             </a>
+
           </div>
         </div>
       </div>
     </template>
 
-    {{-- === Delete Confirmation Modal === --}}
+    {{-- Delete Modal --}}
     <div id="deleteModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
       <div class="bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-xl shadow-xl w-[90%] max-w-md animate-fadeIn">
         <div class="border-b border-[#d2c1b6]/60 px-4 py-3 flex justify-between items-center">
@@ -109,7 +134,7 @@
       </div>
     </div>
 
-    {{-- === Clear Cart Confirmation Modal === --}}
+    {{-- Clear Modal --}}
     <div id="clearModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
       <div class="bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-xl shadow-xl w-[90%] max-w-md animate-fadeIn">
         <div class="border-b border-[#d2c1b6]/60 px-4 py-3 flex justify-between items-center">
@@ -127,97 +152,126 @@
         </div>
       </div>
     </div>
+  </div>
 @endsection
 
-  @push('scripts')
-    <style>
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: scale(0.95);
-        }
-
-        to {
-          opacity: 1;
-          transform: scale(1);
-        }
+@push('scripts')
+  <style>
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
       }
 
-      .animate-fadeIn {
-        animation: fadeIn 0.25s ease-in-out;
+      to {
+        opacity: 1;
+        transform: scale(1);
       }
-    </style>
+    }
 
-    <script>
-      document.addEventListener('alpine:init', () => {
-        Alpine.data('guestCart', () => ({
-          items: [],
-          totalPrice: 0,
-          deleteIndex: null,
+    .animate-fadeIn {
+      animation: fadeIn 0.25s ease-in-out;
+    }
+  </style>
 
-          loadCart() {
-            this.items = JSON.parse(localStorage.getItem('guest_cart') || '[]');
-            this.calculateTotal();
-            this.updateNavCartCount();
-          },
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('guestCart', () => ({
+        items: [],
+        totalPrice: 0,
+        deleteIndex: null,
 
-          saveCart() {
-            localStorage.setItem('guest_cart', JSON.stringify(this.items));
-            this.calculateTotal();
-            this.updateNavCartCount();
-          },
+        loadCart() {
+          this.items = JSON.parse(localStorage.getItem('guest_cart') || '[]');
+          this.calculateTotal();
+          this.updateNavCartCount();
+        },
 
-          updateItem(index) {
-            this.items[index].quantity = Math.max(1, this.items[index].quantity);
-            this.saveCart();
-          },
+        saveCart() {
+          localStorage.setItem('guest_cart', JSON.stringify(this.items));
+          this.calculateTotal();
+          this.updateNavCartCount();
+        },
 
-          openDeleteModal(index) {
-            this.deleteIndex = index;
-            const item = this.items[index];
-            document.getElementById('deleteItemName').textContent = `"${item.title}"`;
-            const modal = document.getElementById('deleteModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-          },
+        updateItem(index) {
+          const item = this.items[index];
+          item.quantity = Math.max(1, item.quantity);
 
-          confirmDelete() {
-            if (this.deleteIndex !== null) {
-              this.items.splice(this.deleteIndex, 1);
-              this.saveCart();
-            }
-            this.closeModal('deleteModal');
-          },
-
-          openClearModal() {
-            const modal = document.getElementById('clearModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-          },
-
-          confirmClear() {
-            this.items = [];
-            localStorage.removeItem('guest_cart');
-            this.calculateTotal();
-            this.updateNavCartCount();
-            this.closeModal('clearModal');
-          },
-
-          closeModal(id) {
-            const modal = document.getElementById(id);
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-          },
-
-          calculateTotal() {
-            this.totalPrice = this.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-          },
-
-          updateNavCartCount() {
-            const count = this.items.reduce((sum, i) => sum + i.quantity, 0);
-            window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count } }));
+          // ✅ Validate stock before saving
+          if (item.stock && item.quantity > item.stock) {
+            this.showStockWarning(`${item.title}`, item.stock);
+            item.quantity = item.stock;
           }
-        }));
-      });
-    </script>
-  @endpush
+
+          this.saveCart();
+        },
+
+        showStockWarning(title, maxStock = null) {
+          const toast = document.createElement('div');
+          toast.className =
+            "fixed bottom-6 right-6 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded-lg px-4 py-3 shadow-md text-sm font-medium z-[9999] animate-fadeIn";
+          toast.innerHTML = maxStock
+            ? `⚠️ The quantity for <strong>${title}</strong> exceeds available stock (${maxStock}).<br>It has been adjusted automatically.`
+            : `⚠️ ${title}`;
+          document.body.appendChild(toast);
+          setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 400);
+          }, 3500);
+        },
+
+        openDeleteModal(index) {
+          this.deleteIndex = index;
+          const item = this.items[index];
+          document.getElementById('deleteItemName').textContent = `"${item.title}"`;
+          const modal = document.getElementById('deleteModal');
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        },
+
+        confirmDelete() {
+          if (this.deleteIndex !== null) {
+            this.items.splice(this.deleteIndex, 1);
+            this.saveCart();
+          }
+          this.closeModal('deleteModal');
+        },
+
+        openClearModal() {
+          const modal = document.getElementById('clearModal');
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        },
+
+        confirmClear() {
+          this.items = [];
+          localStorage.removeItem('guest_cart');
+          this.calculateTotal();
+          this.updateNavCartCount();
+          this.closeModal('clearModal');
+        },
+
+        closeModal(id) {
+          const modal = document.getElementById(id);
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        },
+
+        calculateTotal() {
+          this.totalPrice = this.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+        },
+
+        updateNavCartCount() {
+          const count = this.items.reduce((sum, i) => sum + i.quantity, 0);
+          window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count } }));
+        },
+
+        hasOutOfStock() {
+          // Anggap item tanpa properti stock = 1 (aman)
+          return this.items.some(i => Number(i.stock ?? 1) <= 0);
+        },
+
+      }));
+    });
+  </script>
+@endpush
