@@ -66,7 +66,7 @@ class GuestOrderTrackerController extends Controller
         $path = $request->file('payment_proof')->store('payments', 'public');
 
         $payment->update([
-            'payment_proof'  => $path,
+            'payment_proof' => $path,
             'payment_status' => 'Awaiting Approval',
         ]);
 
@@ -80,19 +80,30 @@ class GuestOrderTrackerController extends Controller
      */
     public function cancel($token)
     {
-        $order = Order::where('token_order', $token)->with('payment')->firstOrFail();
+        $order = Order::where('token_order', $token)
+            ->with(['payment', 'orderItems.book'])
+            ->firstOrFail();
 
+        // Validasi status
         if (!in_array($order->status, ['Pending', 'Processed'])) {
             return back()->with('error', 'You can only cancel pending or processed orders.');
         }
 
+        // Kembalikan stok setiap buku di order
+        foreach ($order->orderItems as $item) {
+            if ($item->book) {
+                $item->book->increment('stock', $item->quantity);
+            }
+        }
+
+        // Update status order dan payment
         $order->update(['status' => 'Cancelled']);
 
         if ($order->payment) {
             $order->payment->update(['payment_status' => 'Rejected']);
         }
 
-        return back()->with('success', 'Order has been cancelled successfully.');
+        return back()->with('success', 'Order has been cancelled successfully, and item stock has been restored.');
     }
 
     /**
@@ -109,5 +120,26 @@ class GuestOrderTrackerController extends Controller
         $order->update(['status' => 'Delivered']);
 
         return back()->with('success', 'Order marked as delivered successfully.');
+    }
+
+    public function findToken(Request $request)
+    {
+        $request->validate([
+            'id_order' => 'required|string',
+            'phone' => 'required|string'
+        ]);
+
+        $order = Order::where('id', $request->id_order)
+            ->where('phone', $request->phone)
+            ->first();
+
+        if (!$order) {
+            return response()->json(['success' => false]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'token_order' => $order->token_order
+        ]);
     }
 }

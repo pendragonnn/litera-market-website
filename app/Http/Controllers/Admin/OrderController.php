@@ -64,7 +64,7 @@ class OrderController extends Controller
             }
 
             // Update order status
-            $order->update(['status' => 'cancelled']);
+            $order->update(['status' => 'pending']);
         });
 
         return redirect()->route('admin.orders.index')->with('error', 'Order has been rejected.');
