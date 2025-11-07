@@ -10,6 +10,22 @@
 </head>
 
 <body class="bg-gray-50 text-gray-800">
+  {{-- === Global Toast Notification === --}}
+  @if (session('success') || session('error'))
+    <div x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 3000)"
+      class="fixed top-5 right-5 z-50 w-[90%] max-w-sm rounded-lg shadow-lg
+                px-4 py-3 border
+                {{ session('success') ? 'bg-green-50 border-green-400 text-green-800' : 'bg-red-50 border-red-400 text-red-800' }}">
+
+      <div class="flex items-center justify-between gap-3">
+        <p class="text-sm font-medium">
+          {{ session('success') ?? session('error') }}
+        </p>
+        <button @click="show = false" class="text-lg font-bold text-gray-500 hover:text-gray-700">×</button>
+      </div>
+    </div>
+  @endif
+
   <div class="flex h-screen">
 
     {{-- === Sidebar === --}}
