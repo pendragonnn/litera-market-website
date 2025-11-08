@@ -15,9 +15,15 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $orders = Order::with(['user', 'payment'])
-            ->orderByDesc('created_at')
-            ->get();
+        $orders = Order::with('user')
+            ->orderBy('created_at', 'desc')
+            ->get(['id', 'user_id', 'name', 'total_price', 'status', 'created_at']);
+
+        // dd($orders);
+        $orders->transform(function ($order) {
+            $order->display_name = $order->user->name ?? $order->name ?? 'Guest';
+            return $order;
+        });
 
         return view('admin.orders.index', compact('orders'));
     }
@@ -68,5 +74,26 @@ class OrderController extends Controller
         });
 
         return redirect()->route('admin.orders.index')->with('error', 'Order has been rejected.');
+    }
+
+    public function cancel(Order $order)
+    {
+        DB::transaction(function () use ($order) {
+            $order->load('orderItems.book');
+
+            foreach ($order->orderItems as $item) {
+                if ($item->book) {
+                    $item->book->increment('stock', $item->quantity);
+                }
+            }
+
+            $order->update(['status' => 'Cancelled']);
+
+            if ($order->payment) {
+                $order->payment->update(['payment_status' => 'Rejected']);
+            }
+        });
+
+        return redirect()->route('admin.orders.index')->with('error', 'Order has been cancelled and stock restored.');
     }
 }
