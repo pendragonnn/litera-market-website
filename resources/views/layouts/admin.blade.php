@@ -44,7 +44,6 @@
         </button>
       </div>
 
-
       <nav class="flex-1 px-4 py-6 space-y-2 text-sm">
         <a href="{{ route('admin.dashboard') }}"
           class="block px-4 py-2 rounded-md hover:bg-[#163246] {{ request()->routeIs('admin.dashboard') ? 'bg-[#163246]' : '' }}">
@@ -84,11 +83,11 @@
     </div>
 
     {{-- === Main Content === --}}
-    <div class="flex-1 flex flex-col lg:ml-64">
+    <div class="flex-1 flex flex-col lg:ml-64 w-screen">
       {{-- Topbar --}}
-      <header class="bg-white border-b flex items-center justify-between px-6 py-3">
-        {{-- Left Section: Hamburger + Title --}}
-        <div class="flex items-center gap-4">
+      <header class="bg-white border-b flex items-center justify-between px-6 py-3 flex-wrap gap-2">
+        {{-- Left Section: Hamburger + Breadcrumb --}}
+        <div class="flex items-center gap-4 flex-wrap">
           {{-- Hamburger button (visible only on mobile) --}}
           <button @click="sidebarOpen = true" class="text-[#1B3C53] focus:outline-none lg:hidden">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
@@ -96,10 +95,17 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
+
+          {{-- Breadcrumb --}}
+          <div>
+            <p class="text-sm text-gray-500 hidden sm:flex">
+              Admin Page > <span class="text-[#1B3C53] font-semibold">@yield('breadcrumb')</span>
+            </p>
+          </div>
         </div>
 
         {{-- Right Section: Profile + Logout --}}
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 py-4">
           {{-- Profile Dropdown --}}
           <x-dropdown align="right" width="48">
             <x-slot name="trigger">
@@ -129,20 +135,6 @@
               </form>
             </x-slot>
           </x-dropdown>
-
-          {{-- Logout Button --}}
-          <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit"
-              class="hidden sm:flex items-center gap-2 bg-[#1B3C53] text-white px-4 py-2 rounded-md hover:bg-[#163246] transition">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2h4a2 2 0 012 2v1" />
-              </svg>
-              <span>Logout</span>
-            </button>
-          </form>
         </div>
       </header>
 
@@ -157,5 +149,4 @@
   <script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
   @stack('scripts')
 </body>
-
 </html>
