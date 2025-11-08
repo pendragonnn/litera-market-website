@@ -94,13 +94,31 @@ class BookController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
+        // Jika admin upload gambar baru
         if ($request->hasFile('image')) {
-            if ($book->image) {
-                Storage::disk('public')->delete($book->image);
+            // Hapus gambar lama jika ada
+            if ($book->image && file_exists(public_path($book->image))) {
+                unlink(public_path($book->image));
             }
-            $validated['image'] = $request->file('image')->store('books', 'public');
+
+            // Buat nama file baru berdasarkan title dan ID buku
+            $extension = $request->file('image')->getClientOriginalExtension();
+            $filename = Str::slug($book->title) . '_' . $book->id . '.' . $extension;
+
+            // Pastikan folder public/books ada
+            $destination = public_path('books');
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+
+            // Pindahkan file baru ke folder public/books
+            $request->file('image')->move($destination, $filename);
+
+            // Simpan path relatif ke database
+            $validated['image'] = 'books/' . $filename;
         }
 
+        // Update data buku
         $book->update($validated);
 
         return redirect()

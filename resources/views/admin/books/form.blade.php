@@ -81,7 +81,7 @@
         <input type="file" name="image"
           class="block w-full text-sm border border-gray-300 rounded-md px-3 py-2">
         @if ($book->image)
-          <img src="{{ asset('storage/' . $book->image) }}" alt="Book Image"
+          <img src="{{ asset($book->image) }}" alt="Book Image"
             class="mt-3 w-32 h-40 object-cover rounded-md border">
         @endif
       </div>
