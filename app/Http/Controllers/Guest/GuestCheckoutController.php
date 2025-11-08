@@ -87,7 +87,7 @@ class GuestCheckoutController extends Controller
       Payment::create([
         'order_id' => $order->id,
         'payment_method' => $validated['payment_method'],
-        'payment_status' => 'Awaiting Approval',
+        'payment_status' => 'Unpaid',
         'payment_proof' => null,
       ]);
 

@@ -17,7 +17,7 @@ return new class extends Migration {
                 ->constrained('orders')
                 ->onDelete('cascade'); // kalau order dihapus total (bukan soft), payment juga
             $table->enum('payment_method', ['COD', 'Transfer']);
-            $table->enum('payment_status', ['Pending', 'Awaiting Approval', 'Paid', 'Rejected'])->default('Pending');
+            $table->enum('payment_status', ['Unpaid', 'Awaiting Approval', 'Paid', 'Rejected'])->default('Unpaid');
             $table->string('payment_proof', 255)->nullable();
             $table->timestamps();
             $table->softDeletes();
