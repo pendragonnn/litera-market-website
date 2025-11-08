@@ -14,17 +14,18 @@ class ReviewController extends Controller
   {
     $ratingFilter = $request->get('rating');
 
-    // === 1️⃣ Ambil data buku yang punya review valid ===
-    $books = Book::select(
-      'books.id',
-      'books.title',
-      'books.author',
-      'books.image',
-      DB::raw('AVG(reviews.rating) as avg_rating'),
-      DB::raw('COUNT(reviews.id) as review_count')
-    )
-      ->join('order_items', 'books.id', '=', 'order_items.book_id')
-      ->join('reviews', 'order_items.id', '=', 'reviews.order_item_id')
+    // === 1️⃣ Ambil semua buku yang punya review, termasuk yang soft deleted ===
+    $books = Book::withTrashed() // ⬅️ include buku yang sudah dihapus
+      ->select(
+        'books.id',
+        'books.title',
+        'books.author',
+        'books.image',
+        DB::raw('AVG(reviews.rating) as avg_rating'),
+        DB::raw('COUNT(reviews.id) as review_count')
+      )
+      ->leftJoin('order_items', 'books.id', '=', 'order_items.book_id')
+      ->leftJoin('reviews', 'order_items.id', '=', 'reviews.order_item_id')
       ->when($ratingFilter, function ($query) use ($ratingFilter) {
         $query->where('reviews.rating', $ratingFilter);
       })
@@ -32,34 +33,39 @@ class ReviewController extends Controller
       ->orderByDesc('review_count')
       ->paginate(8);
 
-    // === 2️⃣ Summary cards (mengacu pada review yang punya book_id valid) ===
+    // === 2️⃣ Summary cards (include buku yang soft deleted juga) ===
 
-    // Total reviews (yang valid)
     $totalReviews = Review::join('order_items', 'reviews.order_item_id', '=', 'order_items.id')
       ->join('books', 'order_items.book_id', '=', 'books.id')
+      ->whereNull('books.deleted_at') // opsional: hapus baris ini kalau mau include buku deleted juga
+      ->orWhereNotNull('books.deleted_at') // ⬅️ biar tetap ambil buku yang soft deleted
       ->count();
 
-      // dd($totalReviews);
-
-    // Average rating (yang valid)
     $averageRating = number_format(
       Review::join('order_items', 'reviews.order_item_id', '=', 'order_items.id')
         ->join('books', 'order_items.book_id', '=', 'books.id')
+        ->where(function ($q) {
+          $q->whereNull('books.deleted_at')
+            ->orWhereNotNull('books.deleted_at');
+        })
         ->avg('reviews.rating'),
       1
     );
 
-    // Most reviewed book (yang valid)
-    $mostReviewedBook = Book::select('books.title')
-      ->join('order_items', 'books.id', '=', 'order_items.book_id')
-      ->join('reviews', 'order_items.id', '=', 'reviews.order_item_id')
+    $mostReviewedBook = Book::withTrashed()
+      ->select('books.title')
+      ->leftJoin('order_items', 'books.id', '=', 'order_items.book_id')
+      ->leftJoin('reviews', 'order_items.id', '=', 'reviews.order_item_id')
       ->groupBy('books.id', 'books.title')
       ->orderByRaw('COUNT(reviews.id) DESC')
       ->value('books.title');
 
-    // Five-star reviews (yang valid)
     $fiveStarCount = Review::join('order_items', 'reviews.order_item_id', '=', 'order_items.id')
       ->join('books', 'order_items.book_id', '=', 'books.id')
+      ->where(function ($q) {
+        $q->whereNull('books.deleted_at')
+          ->orWhereNotNull('books.deleted_at');
+      })
       ->where('reviews.rating', 5)
       ->count();
 
@@ -73,7 +79,6 @@ class ReviewController extends Controller
       'fiveStarCount'
     ));
   }
-
 
   public function show($bookId)
   {
