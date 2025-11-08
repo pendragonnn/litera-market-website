@@ -15,7 +15,13 @@
     <img src="{{ $book->image ? asset($book->image) : 'https://placehold.co/120x160?text=No+Image' }}"
       class="w-28 h-40 object-cover rounded-md border">
     <div>
-      <h2 class="text-xl font-semibold text-[#1B3C53]">{{ $book->title }}</h2>
+      <h2 class="text-xl flex items-center font-semibold text-[#1B3C53]">{{ $book->title }} 
+        @if ($book->deleted_at)
+        <span class="px-2 italic ml-2 py-1 text-xs bg-red-100 text-red-600 rounded-full">
+          Deleted Book
+        </span>
+      @endif
+      </h2>
       <p class="text-sm text-gray-600 mb-3">by {{ $book->author }}</p>
       <p class="text-lg text-[#1B3C53] font-semibold">
         ⭐ {{ $averageRating }}/5 ({{ $totalReviews }} Reviews)

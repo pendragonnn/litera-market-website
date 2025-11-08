@@ -82,7 +82,7 @@ class ReviewController extends Controller
 
   public function show($bookId)
   {
-    $book = Book::findOrFail($bookId);
+    $book = Book::withTrashed()->findOrFail($bookId);
 
     $reviews = Review::whereHas('orderItem', function ($query) use ($bookId) {
       $query->where('book_id', $bookId);
