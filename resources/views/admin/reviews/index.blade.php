@@ -95,23 +95,47 @@
             <a href="{{ $books->url(1) }}" class="paginate_button first">First</a>
           @endif
 
-          {{-- Previous Page --}}
+          {{-- Previous --}}
           @if ($books->onFirstPage())
             <span class="paginate_button previous disabled">&lt;</span>
           @else
             <a href="{{ $books->previousPageUrl() }}" class="paginate_button previous">&lt;</a>
           @endif
 
-          {{-- Page Numbers --}}
-          @foreach ($books->getUrlRange(1, $books->lastPage()) as $page => $url)
-            @if ($page == $books->currentPage())
+          {{-- Page Numbers with Ellipsis --}}
+          @php
+            $current = $books->currentPage();
+            $last = $books->lastPage();
+            $start = max(1, $current - 2);
+            $end = min($last, $current + 2);
+          @endphp
+
+          {{-- Show first page and ellipsis --}}
+          @if ($start > 1)
+            <a href="{{ $books->url(1) }}" class="paginate_button">1</a>
+            @if ($start > 2)
+              <span class="paginate_button disabled">...</span>
+            @endif
+          @endif
+
+          {{-- Main visible page range --}}
+          @for ($page = $start; $page <= $end; $page++)
+            @if ($page == $current)
               <span class="paginate_button current">{{ $page }}</span>
             @else
-              <a href="{{ $url }}" class="paginate_button">{{ $page }}</a>
+              <a href="{{ $books->url($page) }}" class="paginate_button">{{ $page }}</a>
             @endif
-          @endforeach
+          @endfor
 
-          {{-- Next Page --}}
+          {{-- Show ellipsis before last page --}}
+          @if ($end < $last)
+            @if ($end < $last - 1)
+              <span class="paginate_button disabled">...</span>
+            @endif
+            <a href="{{ $books->url($last) }}" class="paginate_button">{{ $last }}</a>
+          @endif
+
+          {{-- Next --}}
           @if ($books->hasMorePages())
             <a href="{{ $books->nextPageUrl() }}" class="paginate_button next">&gt;</a>
           @else

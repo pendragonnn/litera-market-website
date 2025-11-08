@@ -68,14 +68,38 @@
             <a href="{{ $reviews->previousPageUrl() }}" class="paginate_button previous">&lt;</a>
           @endif
 
-          {{-- Page Numbers --}}
-          @foreach ($reviews->getUrlRange(1, $reviews->lastPage()) as $page => $url)
-            @if ($page == $reviews->currentPage())
+          {{-- Page Numbers with Ellipsis --}}
+          @php
+            $current = $reviews->currentPage();
+            $last = $reviews->lastPage();
+            $start = max(1, $current - 2);
+            $end = min($last, $current + 2);
+          @endphp
+
+          {{-- Show first page and ellipsis --}}
+          @if ($start > 1)
+            <a href="{{ $reviews->url(1) }}" class="paginate_button">1</a>
+            @if ($start > 2)
+              <span class="paginate_button disabled">...</span>
+            @endif
+          @endif
+
+          {{-- Visible range --}}
+          @for ($page = $start; $page <= $end; $page++)
+            @if ($page == $current)
               <span class="paginate_button current">{{ $page }}</span>
             @else
-              <a href="{{ $url }}" class="paginate_button">{{ $page }}</a>
+              <a href="{{ $reviews->url($page) }}" class="paginate_button">{{ $page }}</a>
             @endif
-          @endforeach
+          @endfor
+
+          {{-- Ellipsis before last page --}}
+          @if ($end < $last)
+            @if ($end < $last - 1)
+              <span class="paginate_button disabled">...</span>
+            @endif
+            <a href="{{ $reviews->url($last) }}" class="paginate_button">{{ $last }}</a>
+          @endif
 
           {{-- Next Page --}}
           @if ($reviews->hasMorePages())
