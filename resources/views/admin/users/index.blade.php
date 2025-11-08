@@ -1,13 +1,18 @@
 @extends('layouts.admin')
 
+@section('breadcrumb', 'Users Data Management')
+
 @section('content')
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-[#1B3C53]">Users Management</h1>
-    <a href="{{ route('admin.users.create') }}" class="bg-[#1B3C53] text-white px-4 py-2 rounded-md hover:bg-[#163246]">
+  {{-- Header --}}
+  <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+    <h1 class="text-2xl font-bold text-[#1B3C53]">Users Data Management</h1>
+    <a href="{{ route('admin.users.create') }}"
+      class="bg-[#1B3C53] text-white px-4 py-2 rounded-md hover:bg-[#163246] w-full sm:w-auto text-center">
       + Add User
     </a>
   </div>
 
+  {{-- Flash Messages --}}
   @if (session('success'))
     <div class="mb-4 p-3 text-green-700 bg-green-100 rounded-lg">
       {{ session('success') }}
@@ -20,59 +25,69 @@
     </div>
   @endif
 
-  <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-    <table id="usersTable" class="display hover row-border w-full text-sm">
-      <thead class="bg-gray-100 border-b border-gray-300">
-        <tr>
-          <th class="px-4 py-3">Name</th>
-          <th class="px-4 py-3">Email</th>
-          <th class="px-4 py-3">Role</th>
-          <th class="px-4 py-3">Registered At</th>
-          <th class="px-4 py-3 text-center">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @forelse ($users as $user)
-          <tr class="border-b hover:bg-gray-50">
-            <td class="px-4 py-3">{{ $user->name }}</td>
-            <td class="px-4 py-3">{{ $user->email }}</td>
-            <td class="px-4 py-3 capitalize">{{ $user->role }}</td>
-            <td class="px-4 py-3">{{ $user->created_at->format('d M Y') }}</td>
-            <td class="px-4 py-3 text-center flex justify-start gap-2">
-              <a href="{{ route('admin.users.edit', $user) }}"
-                 class="px-3 py-1 bg-[#1B3C53] text-white rounded-md text-xs hover:bg-[#102a3e]">Edit</a>
-              <button type="button" class="px-3 py-1 bg-red-600 text-white rounded-md text-xs hover:bg-red-700"
-                      onclick="openDeleteModal('{{ route('admin.users.destroy', $user) }}', '{{ $user->name }}')">
-                Delete
-              </button>
-            </td>
-          </tr>
-        @empty
+  {{-- Table Section --}}
+  <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4 w-full max-w-full">
+    <div class="overflow-x-auto w-full">
+      <table id="usersTable" class="min-w-[900px] w-full text-sm text-gray-700">
+        <thead class="bg-gray-100 border-b border-gray-300">
           <tr>
-            <td colspan="5" class="text-center py-4 text-gray-500">No users available.</td>
+            <th class="px-4 py-3">Name</th>
+            <th class="px-4 py-3">Email</th>
+            <th class="px-4 py-3">Role</th>
+            <th class="px-4 py-3">Registered At</th>
+            <th class="px-4 py-3 text-center">Actions</th>
           </tr>
-        @endforelse
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @forelse ($users as $user)
+            <tr class="border-b hover:bg-gray-50">
+              <td class="px-4 py-3">{{ $user->name }}</td>
+              <td class="px-4 py-3">{{ $user->email }}</td>
+              <td class="px-4 py-3 capitalize">{{ $user->role }}</td>
+              <td class="px-4 py-3">{{ $user->created_at->format('d M Y') }}</td>
+              <td class="px-4 py-3 flex justify-center sm:justify-start gap-2 flex-wrap">
+                <a href="{{ route('admin.users.edit', $user) }}"
+                  class="px-3 py-1 bg-[#1B3C53] text-white rounded-md text-xs hover:bg-[#102a3e]">Edit</a>
+                <button type="button"
+                  class="px-3 py-1 bg-red-600 text-white rounded-md text-xs hover:bg-red-700"
+                  onclick="openDeleteModal('{{ route('admin.users.destroy', $user) }}', '{{ $user->name }}')">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="5" class="text-center py-4 text-gray-500">No users available.</td>
+            </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
   </div>
 @endsection
 
 {{-- === Delete Confirmation Modal === --}}
 <div id="deleteModal" class="fixed inset-0 z-50 hidden bg-black/40 flex items-center justify-center p-4">
   <div class="bg-white rounded-lg shadow-lg w-full max-w-sm relative overflow-hidden border border-gray-300">
-    <button type="button" onclick="closeDeleteModal()" class="absolute top-2 right-3 text-gray-400 hover:text-gray-600 text-xl">✕</button>
+    {{-- Close Button --}}
+    <button type="button" onclick="closeDeleteModal()"
+      class="absolute top-2 right-3 text-gray-400 hover:text-gray-600 text-xl">✕</button>
 
+    {{-- Modal Header --}}
     <div class="px-6 py-4 border-b border-gray-200">
       <h2 class="text-lg font-semibold text-[#1B3C53]">Confirm Deletion</h2>
     </div>
 
+    {{-- Modal Body --}}
     <div class="px-6 py-5 text-gray-700 text-sm">
       <p>Are you sure you want to delete <span id="userName" class="font-semibold text-[#1B3C53]"></span>?</p>
       <p class="text-gray-500 text-xs mt-2">This action cannot be undone.</p>
     </div>
 
+    {{-- Modal Footer --}}
     <div class="flex justify-end items-start gap-3 px-6 py-4 border-t border-gray-200">
-      <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 text-sm rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300">
+      <button type="button" onclick="closeDeleteModal()"
+        class="px-4 py-2 text-sm rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300">
         Cancel
       </button>
 
@@ -88,42 +103,49 @@
 </div>
 
 @push('scripts')
-<script>
-  function openDeleteModal(actionUrl, userName) {
-    const modal = document.getElementById('deleteModal');
-    const form = document.getElementById('deleteForm');
-    const nameSpan = document.getElementById('userName');
-    form.action = actionUrl;
-    nameSpan.textContent = `"${userName}"`;
-    modal.classList.remove('hidden');
-  }
-
-  function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.add('hidden');
-  }
-
-  document.getElementById('deleteModal').addEventListener('click', function (e) {
-    if (e.target === this) closeDeleteModal();
-  });
-
-  document.addEventListener('DOMContentLoaded', function () {
-    if ($('#usersTable').length) {
-      $('#usersTable').DataTable({
-        responsive: true,
-        language: {
-          search: "",
-          searchPlaceholder: "Search user...",
-          lengthMenu: "Show _MENU_ per page",
-          zeroRecords: "No matching users found",
-          info: "Showing _START_ to _END_ of _TOTAL_ users",
-          infoEmpty: "No users to display",
-          paginate: { first: "First", last: "Last", next: ">", previous: "<" }
-        },
-        pageLength: 10,
-        lengthMenu: [5, 10, 25, 50],
-        order: [[0, 'asc']]
-      });
+  <script>
+    function openDeleteModal(actionUrl, userName) {
+      const modal = document.getElementById('deleteModal');
+      const form = document.getElementById('deleteForm');
+      const nameSpan = document.getElementById('userName');
+      form.action = actionUrl;
+      nameSpan.textContent = `"${userName}"`;
+      modal.classList.remove('hidden');
     }
-  });
-</script>
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.add('hidden');
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('deleteModal').addEventListener('click', function (e) {
+      if (e.target === this) closeDeleteModal();
+    });
+
+    // DataTable setup
+    document.addEventListener('DOMContentLoaded', function () {
+      if ($('#usersTable').length) {
+        $('#usersTable').DataTable({
+          responsive: true,
+          language: {
+            search: "",
+            searchPlaceholder: "Search user...",
+            lengthMenu: "Show _MENU_ per page",
+            zeroRecords: "No matching users found",
+            info: "Showing _START_ to _END_ of _TOTAL_ users",
+            infoEmpty: "No users to display",
+            paginate: {
+              first: "First",
+              last: "Last",
+              next: ">",
+              previous: "<"
+            }
+          },
+          pageLength: 10,
+          lengthMenu: [5, 10, 25, 50],
+          order: [[0, 'asc']]
+        });
+      }
+    });
+  </script>
 @endpush
