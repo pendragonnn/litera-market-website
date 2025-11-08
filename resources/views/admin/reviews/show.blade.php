@@ -1,6 +1,8 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'Book Reviews')
+@section('title', 'Admin Panel | Review Details')
+
+@section('breadcrumb', 'Reviews Data Monitoring > Reviews Details')
 
 @section('content')
   <div class="flex justify-between items-center mb-6 flex-wrap gap-3">

@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', 'Admin Panel | Reviews')
+
 @section('breadcrumb', 'Reviews Data Monitoring')
 
 @section('content')

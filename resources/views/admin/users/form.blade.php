@@ -1,5 +1,9 @@
 @extends('layouts.admin')
 
+@section('title', 'Admin Panel | Users Form')
+
+@section('breadcrumb', 'Users Data Management > Users Form')
+
 @section('content')
   <h1 class="text-2xl font-bold text-[#1B3C53] mb-6">
     {{ $user->exists ? 'Edit User' : 'Add New User' }}

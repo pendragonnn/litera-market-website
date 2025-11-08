@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Litera Market | User Success Order')
+
 @section('content')
 <div class="flex flex-col items-center justify-center min-h-[70vh] px-4 py-10 text-center">
 

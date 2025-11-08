@@ -1,5 +1,9 @@
 @extends('layouts.admin')
 
+@section('title', 'Admin Panel | Categories Form')
+
+@section('breadcrumb', 'Categories Data Management > Categories Form')
+
 @section('content')
   <h1 class="text-2xl font-bold text-[#1B3C53] mb-6">
     {{ $category->exists ? 'Edit Category' : 'Add New Category' }}

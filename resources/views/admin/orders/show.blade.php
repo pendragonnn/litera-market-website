@@ -1,6 +1,8 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'Order Detail')
+@section('title', 'Admin Panel | Order Details')
+
+@section('breadcrumb', 'Orders Data Management > Order Details')
 
 @section('content')
   {{-- Header --}}

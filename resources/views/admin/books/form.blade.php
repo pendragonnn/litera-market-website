@@ -1,6 +1,10 @@
 @extends('layouts.admin')
 {{-- {{ dd($book) }} --}}
 
+@section('title', 'Admin Panel | Books Form')
+
+@section('breadcrumb', 'Books Data Management > Books Form')
+
 @section('content')
   <h1 class="text-2xl font-bold text-[#1B3C53] mb-6">
     {{ $book->exists ? 'Edit Book' : 'Add New Book' }}

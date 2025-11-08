@@ -1,10 +1,10 @@
 @extends('layouts.admin')
 
+@section('title', 'Admin Panel | Dashboard')
+
+@section('breadcrumb', 'Dashboard')
+
 @section('content')
-  {{-- Breadcrumb --}}
-  <p class="text-sm text-gray-500 mb-4">
-    Admin Page > <span class="text-[#1B3C53] font-semibold">Admin Dashboard</span>
-  </p>
 
   {{-- Stats Card Section --}}
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">

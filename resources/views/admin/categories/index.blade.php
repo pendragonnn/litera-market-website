@@ -1,6 +1,8 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'Categories Management')
+@section('title', 'Admin Panel | Categories')
+
+@section('breadcrumb', 'Categories Data Management')
 
 @section('content')
   {{-- Header --}}

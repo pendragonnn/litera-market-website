@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Litera Market | Guest Checkout')
+
 @section('content')
   <div class="max-w-4xl mx-auto py-10 px-4" x-data="guestCheckout()" x-init="loadCart()">
     {{-- Title --}}
