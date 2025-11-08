@@ -1,8 +1,10 @@
 @extends('layouts.admin')
-{{-- {{ dd($orders) }} --}}
+
+@section('breadcrumb', 'Orders Data Management')
 
 @section('content')
-  <div class="flex justify-between items-center mb-6">
+  {{-- Header --}}
+  <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
     <h1 class="text-2xl font-bold text-[#1B3C53]">Orders Data Management</h1>
   </div>
 
@@ -19,71 +21,62 @@
     </div>
   @endif
 
-  <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-    <table id="ordersTable" class="display hover row-border w-full text-sm">
-      <thead class="bg-gray-100 border-b border-gray-300">
-        <tr>
-          <th class="px-4 py-3">Order ID</th>
-          <th class="px-4 py-3">Customer</th>
-          <th class="px-4 py-3">Total Price</th>
-          <th class="px-4 py-3">Status</th>
-          <th class="px-4 py-3">Payment</th>
-          <th class="px-4 py-3 text-center">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @forelse ($orders as $order)
-          <tr class="border-b hover:bg-gray-50">
-            <td class="px-4 py-3 font-medium text-gray-800">#{{ $order->id }}</td>
-            <td class="px-4 py-3">{{ $order->user->name ?? 'Unknown User' }}</td>
-            <td class="px-4 py-3">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
-            <td class="px-4 py-3">
-              @php
-                $statusColors = [
+  {{-- Table Section --}}
+  <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4 w-full max-w-full">
+    <div class="overflow-x-auto w-full">
+      <table id="ordersTable" class="min-w-[1000px] w-full text-sm text-gray-700">
+        <thead class="bg-gray-100 border-b border-gray-300">
+          <tr>
+            <th class="px-4 py-3">Order ID</th>
+            <th class="px-4 py-3">Customer</th>
+            <th class="px-4 py-3">Total Price</th>
+            <th class="px-4 py-3">Status</th>
+            <th class="px-4 py-3">Payment</th>
+            <th class="px-4 py-3 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @forelse ($orders as $order)
+            <tr class="border-b hover:bg-gray-50">
+              <td class="px-4 py-3 font-medium text-gray-800">#{{ $order->id }}</td>
+              <td class="px-4 py-3">{{ $order->display_name }}</td>
+              <td class="px-4 py-3">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
+              <td class="px-4 py-3">
+                @php
+                  $statusColors = [
                     'Pending' => 'bg-yellow-100 text-yellow-700',
                     'Shipped' => 'bg-blue-100 text-blue-700',
                     'Delivered' => 'bg-green-100 text-green-700',
                     'Cancelled' => 'bg-red-100 text-red-700',
-                ];
-              @endphp
-              <span class="px-2 py-1 rounded-md text-xs font-semibold {{ $statusColors[$order->status] ?? 'bg-gray-100 text-gray-600' }}">
-                {{ ucfirst($order->status) }}
-              </span>
-            </td>
-            <td class="px-4 py-3">
-              <span class="text-sm text-gray-700">
-                {{ ucfirst($order->payment->payment_status ?? 'N/A') }}
-              </span>
-            </td>
-            <td class="px-4 py-3 text-center items-start flex justify-start gap-2">
-              <a href="{{ route('admin.orders.show', $order) }}"
-                 class="px-3 py-1 bg-[#1B3C53] text-white rounded-md text-xs hover:bg-[#102a3e]">View</a>
-
-              @if ($order->status === 'Processed' && $order->payment->payment_status === "Awaiting Approval")
-                <form action="{{ route('admin.orders.confirm', $order) }}" method="POST">
-                  @csrf
-                  <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded-md text-xs hover:bg-green-700">
-                    Confirm
-                  </button>
-                </form>
-                <button type="button"
-                        class="px-3 py-1 bg-red-600 text-white rounded-md text-xs hover:bg-red-700"
-                        onclick="openRejectModal('{{ route('admin.orders.reject', $order) }}', '{{ $order->id }}')">
-                  Reject
-                </button>
-              @endif
-            </td>
-          </tr>
-        @empty
-          <tr>
-            <td colspan="6" class="text-center py-4 text-gray-500">No orders available.</td>
-          </tr>
-        @endforelse
-      </tbody>
-    </table>
+                  ];
+                @endphp
+                <span
+                  class="px-2 py-1 rounded-md text-xs font-semibold {{ $statusColors[$order->status] ?? 'bg-gray-100 text-gray-600' }}">
+                  {{ ucfirst($order->status) }}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="text-sm text-gray-700">
+                  {{ ucfirst($order->payment->payment_status ?? 'N/A') }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <a href="{{ route('admin.orders.show', $order) }}"
+                  class="px-3 py-1 bg-[#1B3C53] text-white rounded-md text-xs hover:bg-[#102a3e] whitespace-nowrap">
+                  View
+                </a>
+              </td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="6" class="text-center py-4 text-gray-500">No orders available.</td>
+            </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
   </div>
 @endsection
-
 
 {{-- === Reject Confirmation Modal === --}}
 <div id="rejectModal" class="fixed inset-0 z-50 hidden bg-black/40 flex items-center justify-center p-4">
@@ -113,7 +106,7 @@
 
 @push('scripts')
   <script>
-    function openRejectModal(actionUrl, orderId) {
+    function openRejectModal(actionUrl) {
       const modal = document.getElementById('rejectModal');
       const form = document.getElementById('rejectForm');
       form.action = actionUrl;
@@ -149,7 +142,7 @@
           },
           pageLength: 10,
           lengthMenu: [5, 10, 25, 50],
-          order: [[0, 'asc']]
+          order: false
         });
       }
     });
