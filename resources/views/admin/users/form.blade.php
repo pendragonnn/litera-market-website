@@ -42,7 +42,7 @@
         <select name="role" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-[#d2c1b6] focus:border-[#d2c1b6]" required>
           <option value="">-- Select Role --</option>
           <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
-          <option value="user" {{ old('role', $user->role) == 'user' ? 'selected' : '' }}>User</option>
+          <option value="customer" {{ old('role', $user->role) == 'customer' ? 'selected' : '' }}>Customer</option>
         </select>
       </div>
 
