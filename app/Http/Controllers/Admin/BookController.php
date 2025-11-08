@@ -7,6 +7,8 @@ use App\Models\Book;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 
 class BookController extends Controller
 {
@@ -40,11 +42,28 @@ class BookController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('books', 'public');
-        }
+        // Simpan data buku tanpa gambar dulu untuk dapat ID
+        $book = Book::create(Arr::except($validated, ['image']));
 
-        Book::create($validated);
+        // Kalau admin upload gambar
+        if ($request->hasFile('image')) {
+            $extension = $request->file('image')->getClientOriginalExtension();
+            $filename = Str::slug($book->title) . '_' . $book->id . '.' . $extension;
+
+            // Path tujuan: public/books/
+            $destination = public_path('books');
+
+            // Pastikan folder 'public/books' ada
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+
+            // Pindahkan file ke folder publik
+            $request->file('image')->move($destination, $filename);
+
+            // Simpan path relatif ke database
+            $book->update(['image' => 'books/' . $filename]);
+        }
 
         return redirect()
             ->route('admin.books.index')
