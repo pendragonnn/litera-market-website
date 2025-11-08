@@ -24,7 +24,7 @@
   {{-- Table Section --}}
   <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4 w-full max-w-full">
     <div class="overflow-x-auto w-full">
-      <table id="ordersTable" class="min-w-[1000px] w-full text-sm text-gray-700">
+      <table id="ordersTable" class="min-w-[900px] w-full text-sm text-gray-700">
         <thead class="bg-gray-100 border-b border-gray-300">
           <tr>
             <th class="px-4 py-3">Order ID</th>
