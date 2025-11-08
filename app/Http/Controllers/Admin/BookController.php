@@ -128,10 +128,12 @@ class BookController extends Controller
 
     public function destroy(Book $book)
     {
-        if ($book->image) {
-            Storage::disk('public')->delete($book->image);
+        // Hapus gambar lama jika ada dan file-nya masih eksis
+        if ($book->image && file_exists(public_path($book->image))) {
+            unlink(public_path($book->image));
         }
 
+        // Hapus data buku dari database
         $book->delete();
 
         return redirect()
