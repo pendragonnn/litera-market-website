@@ -1,48 +1,56 @@
 @extends('layouts.admin')
 
+@section('breadcrumb', 'Categories Management')
+
 @section('content')
-  <div class="flex justify-between items-center mb-6">
+  {{-- Header --}}
+  <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
     <h1 class="text-2xl font-bold text-[#1B3C53]">Categories Management</h1>
-    <a href="{{ route('admin.categories.create') }}" class="bg-[#1B3C53] text-white px-4 py-2 rounded-md hover:bg-[#163246]">
+    <a href="{{ route('admin.categories.create') }}"
+      class="bg-[#1B3C53] text-white px-4 py-2 rounded-md hover:bg-[#163246] w-full sm:w-auto text-center">
       + Add Category
     </a>
   </div>
 
+  {{-- Success Message --}}
   @if (session('success'))
     <div class="mb-4 p-3 text-green-700 bg-green-100 rounded-lg">
       {{ session('success') }}
     </div>
   @endif
 
-  <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-    <table id="categoriesTable" class="display hover row-border w-full text-sm">
-      <thead class="bg-gray-100 border-b border-gray-300">
-        <tr>
-          <th class="px-4 py-3">Category Name</th>
-          <th class="px-4 py-3 text-center">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @forelse ($categories as $index => $category)
-          <tr class="border-b hover:bg-gray-50">
-            <td class="px-4 py-3">{{ $category->name }}</td>
-            <td class="px-4 py-3 text-center flex justify-start gap-2">
-              <a href="{{ route('admin.categories.edit', $category) }}"
-                class="px-3 py-1 bg-[#1B3C53] text-white rounded-md text-xs hover:bg-[#102a3e]">Edit</a>
-              <button type="button"
-                class="px-3 py-1 bg-red-600 text-white rounded-md text-xs hover:bg-red-700"
-                onclick="openDeleteModal('{{ route('admin.categories.destroy', $category) }}', '{{ $category->name }}')">
-                Delete
-              </button>
-            </td>
-          </tr>
-        @empty
+  {{-- Table Section --}}
+  <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4 w-full max-w-full">
+    <div class="overflow-x-auto w-full">
+      <table id="categoriesTable" class="min-w-[600px] w-full text-sm text-gray-700">
+        <thead class="bg-gray-100 border-b border-gray-300">
           <tr>
-            <td colspan="3" class="text-center py-4 text-gray-500">No categories available.</td>
+            <th class="px-4 py-3">Category Name</th>
+            <th class="px-4 py-3 text-center">Actions</th>
           </tr>
-        @endforelse
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @forelse ($categories as $category)
+            <tr class="border-b hover:bg-gray-50">
+              <td class="px-4 py-3">{{ $category->name }}</td>
+              <td class="px-4 py-3 flex justify-center sm:justify-start gap-2 flex-wrap">
+                <a href="{{ route('admin.categories.edit', $category) }}"
+                  class="px-3 py-1 bg-[#1B3C53] text-white rounded-md text-xs hover:bg-[#102a3e]">Edit</a>
+                <button type="button"
+                  class="px-3 py-1 bg-red-600 text-white rounded-md text-xs hover:bg-red-700"
+                  onclick="openDeleteModal('{{ route('admin.categories.destroy', $category) }}', '{{ $category->name }}')">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="2" class="text-center py-4 text-gray-500">No categories available.</td>
+            </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
   </div>
 @endsection
 
@@ -124,7 +132,7 @@
           },
           pageLength: 10,
           lengthMenu: [5, 10, 25, 50],
-          order: [[1, 'asc']]
+          order: [[0, 'asc']]
         });
       }
     });
