@@ -24,14 +24,15 @@
       </div>
       <div>
         <p><span class="font-medium text-gray-700">Total Price:</span> Rp
-          {{ number_format($order->total_price, 0, ',', '.') }}</p>
+          {{ number_format($order->total_price, 0, ',', '.') }}
+        </p>
         <p><span class="font-medium text-gray-700">Order Status:</span>
           <span class="px-2 py-1 rounded-md text-xs font-semibold
-              @if ($order->status === 'Pending') bg-yellow-100 text-yellow-700
-              @elseif ($order->status === 'Shipped') bg-blue-100 text-blue-700
-              @elseif ($order->status === 'Delivered') bg-green-100 text-green-700
-              @elseif ($order->status === 'Cancelled') bg-red-100 text-red-700
-              @else bg-gray-100 text-gray-600 @endif">
+                    @if ($order->status === 'Pending') bg-yellow-100 text-yellow-700
+                    @elseif ($order->status === 'Shipped') bg-blue-100 text-blue-700
+                    @elseif ($order->status === 'Delivered') bg-green-100 text-green-700
+                    @elseif ($order->status === 'Cancelled') bg-red-100 text-red-700
+                    @else bg-gray-100 text-gray-600 @endif">
             {{ ucfirst($order->status) }}
           </span>
         </p>
@@ -115,6 +116,47 @@
     </div>
   @endif
 
+  {{-- Admin Actions --}}
+  @if (
+    ($order->status === 'Pending') ||
+    ($order->payment && $order->payment->payment_status === 'Rejected' && $order->status !== 'Cancelled')
+  )
+    <div class="flex justify-end flex-wrap gap-3">
+      <button type="button" onclick="openCancelModal('{{ route('admin.orders.cancel', $order) }}')"
+        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium">
+        Cancel Order
+      </button>
+    </div>
+  @endif
+
+  {{-- === Cancel Modal === --}}
+  <div id="cancelModal" class="fixed inset-0 z-50 hidden bg-black/40 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-sm relative overflow-hidden border border-gray-300">
+      <button type="button" onclick="closeCancelModal()"
+        class="absolute top-2 right-3 text-gray-400 hover:text-gray-600 text-xl">✕</button>
+
+      <div class="px-6 py-5 text-center">
+        <h2 class="text-lg font-semibold text-[#1B3C53] mb-3">Cancel Order</h2>
+        <p class="text-gray-600 text-sm mb-6">
+          Are you sure you want to cancel this order? This action will restore all book stocks and cannot be undone.
+        </p>
+        <div class="flex justify-center gap-3">
+          <button type="button" onclick="closeCancelModal()"
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+            Close
+          </button>
+          <form id="cancelForm" method="POST">
+            @csrf
+            @method('PATCH')
+            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+              Yes, Cancel
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   {{-- === Confirm Modal === --}}
   <div id="confirmModal" class="fixed inset-0 z-50 hidden bg-black/40 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-sm relative overflow-hidden border border-gray-300">
@@ -135,6 +177,34 @@
             @csrf
             <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
               Yes, Confirm
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{-- === Cancel Modal === --}}
+  <div id="cancelModal" class="fixed inset-0 z-50 hidden bg-black/40 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-sm relative overflow-hidden border border-gray-300">
+      <button type="button" onclick="closeCancelModal()"
+        class="absolute top-2 right-3 text-gray-400 hover:text-gray-600 text-xl">✕</button>
+
+      <div class="px-6 py-5 text-center">
+        <h2 class="text-lg font-semibold text-[#1B3C53] mb-3">Cancel Order</h2>
+        <p class="text-gray-600 text-sm mb-6">
+          Are you sure you want to cancel this order? This action will restore all book stocks and cannot be undone.
+        </p>
+        <div class="flex justify-center gap-3">
+          <button type="button" onclick="closeCancelModal()"
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+            Close
+          </button>
+          <form id="cancelForm" method="POST">
+            @csrf
+            @method('PATCH')
+            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+              Yes, Cancel
             </button>
           </form>
         </div>
@@ -201,5 +271,22 @@
     document.getElementById('rejectModal').addEventListener('click', (e) => {
       if (e.target === e.currentTarget) closeRejectModal();
     });
+
+    function openCancelModal(actionUrl) {
+      const modal = document.getElementById('cancelModal');
+      const form = document.getElementById('cancelForm');
+      form.action = actionUrl;
+      modal.classList.remove('hidden');
+    }
+
+    function closeCancelModal() {
+      document.getElementById('cancelModal').classList.add('hidden');
+    }
+
+    // close on overlay click
+    document.getElementById('cancelModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeCancelModal();
+    });
+
   </script>
 @endpush

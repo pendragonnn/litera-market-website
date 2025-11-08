@@ -69,6 +69,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         ->name('orders.confirm');
     Route::post('/orders/{order}/reject', [\App\Http\Controllers\Admin\OrderController::class, 'reject'])
         ->name('orders.reject');
+    Route::patch('/admin/orders/{order}/cancel', [\App\Http\Controllers\Admin\OrderController::class, 'cancel'])
+        ->name('orders.cancel');
 
     // Reviews Monitoring
     Route::resource('/reviews', ReviewController::class)->only(['index', 'show']);
@@ -121,7 +123,7 @@ Route::prefix('guest')->name('guest.')->group(function () {
     Route::patch('/order/{token}/cancel', [GuestOrderTrackerController::class, 'cancel'])->name('order.tracker.cancel');
     Route::patch('/order/{token}/complete', [GuestOrderTrackerController::class, 'complete'])->name('order.tracker.complete');
     Route::post('/order-tracker/find-token', [GuestOrderTrackerController::class, 'findToken'])
-    ->name('order.tracker.findToken');
+        ->name('order.tracker.findToken');
 });
 
 Route::middleware('auth:sanctum')->get('/cart/count', function (Request $request) {

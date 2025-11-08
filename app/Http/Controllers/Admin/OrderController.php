@@ -75,4 +75,25 @@ class OrderController extends Controller
 
         return redirect()->route('admin.orders.index')->with('error', 'Order has been rejected.');
     }
+
+    public function cancel(Order $order)
+    {
+        DB::transaction(function () use ($order) {
+            $order->load('orderItems.book');
+
+            foreach ($order->orderItems as $item) {
+                if ($item->book) {
+                    $item->book->increment('stock', $item->quantity);
+                }
+            }
+
+            $order->update(['status' => 'Cancelled']);
+
+            if ($order->payment) {
+                $order->payment->update(['payment_status' => 'Rejected']);
+            }
+        });
+
+        return redirect()->route('admin.orders.index')->with('error', 'Order has been cancelled and stock restored.');
+    }
 }
