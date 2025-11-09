@@ -8,13 +8,12 @@ use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Book;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class GuestCheckoutController extends Controller
 {
   /**
-   * Show guest checkout form
+   * Tampilkan halaman checkout untuk guest
    */
   public function index()
   {
@@ -22,7 +21,7 @@ class GuestCheckoutController extends Controller
   }
 
   /**
-   * Handle guest checkout submission
+   * Proses penyimpanan order guest (tanpa token)
    */
   public function store(Request $request)
   {
@@ -37,16 +36,14 @@ class GuestCheckoutController extends Controller
     ]);
 
     DB::beginTransaction();
+
     try {
-      $token = strtoupper(Str::random(10));
       $isCOD = strtolower($validated['payment_method']) === 'cod';
       $orderStatus = $isCOD ? 'Processed' : 'Pending';
-      $paymentStatus = $isCOD ? 'Unpaid' : 'Unpaid';
+      $paymentStatus = 'Unpaid';
 
-      // Buat Order
       $order = Order::create([
         'user_id' => null,
-        'token_order' => $token,
         'name' => $validated['name'],
         'phone' => $validated['phone'],
         'address' => $validated['address'],
@@ -58,6 +55,7 @@ class GuestCheckoutController extends Controller
 
       foreach ($validated['cart'] as $item) {
         $book = Book::findOrFail($item['book_id']);
+
         if ($book->stock < $item['quantity']) {
           throw new \Exception("Insufficient stock for {$book->title}");
         }
@@ -78,7 +76,6 @@ class GuestCheckoutController extends Controller
 
       $order->update(['total_price' => $total]);
 
-      // Payment COD
       Payment::create([
         'order_id' => $order->id,
         'payment_method' => strtoupper($validated['payment_method']),
@@ -88,11 +85,14 @@ class GuestCheckoutController extends Controller
 
       DB::commit();
 
+      // 🔐 Generate secure key
+      $key = hash('sha256', $order->id . '|' . $order->phone . config('app.key'));
+
+      // 🔁 Redirect ke success page pakai ID + key
       return response()->json([
         'success' => true,
-        'redirect_url' => route('guest.checkout.success', $token),
+        'redirect_url' => route('guest.checkout.success', ['id' => $order->id, 'key' => $key]),
       ]);
-
     } catch (\Exception $e) {
       DB::rollBack();
 
@@ -104,11 +104,17 @@ class GuestCheckoutController extends Controller
   }
 
   /**
-   * Success page setelah guest selesai order
+   * Tampilkan halaman sukses setelah guest order
    */
-  public function success($token)
+  public function success($id, $key)
   {
-    $order = Order::where('token_order', $token)->with('payment')->firstOrFail();
+    $order = Order::with('payment')->findOrFail($id);
+    $validKey = hash('sha256', $order->id . '|' . $order->phone . config('app.key'));
+
+    if ($key !== $validKey) {
+      abort(403, 'Unauthorized access.');
+    }
+
     return view('guest.checkout.success', compact('order'));
   }
 }

@@ -3,6 +3,11 @@
 @section('title', 'Litera Market | Guest Success Order')
 
 @section('content')
+  @php
+    // 🔐 Generate secure key buat tombol "Track My Order"
+    $key = hash('sha256', $order->id . '|' . $order->phone . config('app.key'));
+  @endphp
+
   <div class="flex flex-col items-center justify-center min-h-[70vh] px-4 py-10 text-center">
 
     {{-- ✅ Success Icon --}}
@@ -14,7 +19,6 @@
       </svg>
     </div>
 
-    {{-- ✅ Title --}}
     <h1 class="text-2xl font-bold text-[#1B3C53] mb-2">Order Successful!</h1>
     <p class="text-gray-700 mb-1">
       Thank you for shopping at <span class="font-semibold text-[#1B3C53]">LiteraMarket</span>.
@@ -27,28 +31,26 @@
     <div class="bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-lg shadow-sm p-6 text-left max-w-md w-full mb-8">
       <h2 class="font-semibold text-lg text-[#1B3C53] mb-3">Order Summary</h2>
       <ul class="text-gray-700 text-sm space-y-2">
+        <li><span class="font-semibold">Order ID:</span> #{{ $order->id }}</li>
         <li><span class="font-semibold">Name:</span> {{ $order->name }}</li>
         <li><span class="font-semibold">Address:</span> {{ $order->address }}</li>
         <li><span class="font-semibold">WhatsApp Number:</span> {{ $order->phone }}</li>
         <li><span class="font-semibold">Payment Method:</span> {{ strtoupper($order->payment->payment_method ?? '-') }}
         </li>
-        <li><span class="font-semibold">Order ID:</span> {{ $order->id }}</li>
       </ul>
     </div>
 
     {{-- ✅ Conditional Info --}}
     @if (strtoupper($order->payment->payment_method ?? '') === 'COD')
-      {{-- COD Info --}}
       <div
         class="max-w-md bg-blue-50 border border-blue-200 text-blue-800 text-sm px-5 py-4 rounded-lg shadow-sm mb-8 text-left">
         <p class="font-semibold mb-1">🚚 Your order is being processed!</p>
         <p class="leading-relaxed">
-          Please prepare the payment in cash when the courier arrives at your address.
-          Our team will ship your order shortly you can track the delivery status using your Order ID.
+          Please prepare the payment in cash when the courier arrives.
+          You can track the delivery status later using your secure tracking link below.
         </p>
       </div>
     @else
-      {{-- Bank Transfer Info --}}
       <div
         class="max-w-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm px-5 py-4 rounded-lg shadow-sm mb-8 text-left">
         <p class="font-semibold mb-1">💳 Complete Your Payment</p>
@@ -73,32 +75,12 @@
         class="px-5 py-2 bg-gray-200 text-[#1B3C53] rounded-md hover:bg-gray-300 transition text-sm font-medium">
         ← Back to Homepage
       </a>
-      <a href="{{ route('guest.order.tracker.show', ['token' => $order->token_order]) }}"
+
+      {{-- 🔗 Secure Direct to Order Detail Page --}}
+      <a href="{{ route('guest.order.tracker.show', ['id' => $order->id, 'key' => $key]) }}"
         class="px-5 py-2 bg-[#1B3C53] text-white rounded-md hover:bg-[#163246] transition text-sm font-medium">
         📦 Track My Order
       </a>
     </div>
   </div>
-
-  {{-- ✅ Copy Script --}}
-  @push('scripts')
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const copyBtn = document.getElementById('copyBtn');
-        const orderToken = document.getElementById('orderToken');
-        const copyMsg = document.getElementById('copyMsg');
-
-        copyBtn.addEventListener('click', async () => {
-          try {
-            await navigator.clipboard.writeText(orderToken.textContent.trim());
-            copyMsg.classList.remove('hidden');
-            copyMsg.classList.add('block');
-            setTimeout(() => copyMsg.classList.add('hidden'), 2000);
-          } catch (err) {
-            alert('Failed to copy token. Please copy it manually.');
-          }
-        });
-      });
-    </script>
-  @endpush
 @endsection

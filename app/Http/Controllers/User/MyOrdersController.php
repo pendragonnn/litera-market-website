@@ -61,9 +61,9 @@ class MyOrdersController extends Controller
 
         $order->update(['status' => 'Cancelled']);
 
-        if ($order->payment) {
-            $order->payment->update(['payment_status' => 'Rejected']);
-        }
+        // if ($order->payment) {
+        //     $order->payment->update(['payment_status' => 'Rejected']);
+        // }
 
         return back()->with('success', 'Order has been cancelled successfully.');
     }

@@ -47,11 +47,11 @@
             please make your payment to one of the accounts below and upload the payment proof in your order details.
           </p>
           <ul class="list-disc pl-5 space-y-1 text-[13px]">
-            <li><span class="font-medium">Bank BCA:</span> 1234567890 — <span class="italic">PT Litera Market
+            <li><span class="font-medium">Bank BCA:</span> 1234567890 | <span class="italic">a.n. PT Litera Market
                 Indonesia</span></li>
-            <li><span class="font-medium">Bank Mandiri:</span> 9876543210 — <span class="italic">PT Litera Market
+            <li><span class="font-medium">Bank Mandiri:</span> 9876543210 | <span class="italic">a.n. PT Litera Market
                 Indonesia</span></li>
-            <li><span class="font-medium">Bank BNI:</span> 5678901234 — <span class="italic">PT Litera Market
+            <li><span class="font-medium">Bank BNI:</span> 5678901234 | <span class="italic">a.n. PT Litera Market
                 Indonesia</span></li>
           </ul>
           <p class="mt-3 text-xs text-gray-600 italic">

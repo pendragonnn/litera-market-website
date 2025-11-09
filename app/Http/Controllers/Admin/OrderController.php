@@ -118,9 +118,9 @@ class OrderController extends Controller
 
             $order->update(['status' => 'Cancelled']);
 
-            if ($order->payment) {
-                $order->payment->update(['payment_status' => 'Rejected']);
-            }
+            // if ($order->payment) {
+            //     $order->payment->update(['payment_status' => 'Rejected']);
+            // }
         });
 
         return redirect()->route('admin.orders.index')->with('error', 'Order has been cancelled and stock restored.');
