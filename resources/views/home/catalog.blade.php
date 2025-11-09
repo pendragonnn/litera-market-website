@@ -28,7 +28,8 @@
                 class="bg-[#002D72] text-white text-xs sm:text-sm font-medium px-3 py-1.5 rounded-md hover:bg-[#001E4D] transition"
                 data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-author="{{ $book->author }}"
                 data-description="{{ $book->description }}" data-price="{{ $book->price ?? 0 }}"
-                data-stock="{{ $book->stock }}" data-image="{{ $book->image ?? asset('images/default-book.jpg') }}"
+                data-stock="{{ $book->stock }}"
+                data-image="{{ $book->image ? asset($book->image) : asset('images/default-book.jpg') }}"
                 onclick="openBookModal(this)">
                 detail
               </button>
@@ -38,7 +39,8 @@
                 <button
                   class="add-to-cart bg-[#2E7D32] text-white text-xs sm:text-sm font-medium px-3 py-1.5 rounded-md hover:bg-[#1B5E20] transition"
                   data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-price="{{ $book->price ?? 0 }}"
-                  data-stock="{{ $book->stock }}" data-image="{{ $book->image ?? asset('images/default-book.jpg') }}">
+                  data-stock="{{ $book->stock }}"
+                  data-image="{{ $book->image ? asset($book->image) : asset('images/default-book.jpg') }}">
                   🛒
                 </button>
               @else
