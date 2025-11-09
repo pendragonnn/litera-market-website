@@ -17,7 +17,7 @@
   <p class="text-gray-700 mb-1">
     Thank you for shopping at <span class="font-semibold text-[#1B3C53]">LiteraMarket</span>.
   </p>
-  <p class="text-gray-600 mb-6">Your order is now being processed. You can check your order details below.</p>
+  <p class="text-gray-600 mb-6">Your order details are listed below.</p>
 
   {{-- ✅ Order Summary --}}
   <div class="bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-xl shadow-md p-6 text-left max-w-md w-full mb-10">
@@ -27,39 +27,53 @@
       </svg>
       Order Summary
     </h2>
-
     <ul class="text-gray-700 text-sm space-y-2">
       <li><span class="font-semibold text-[#1B3C53]">Name:</span> {{ $order->name }}</li>
       <li><span class="font-semibold text-[#1B3C53]">Address:</span> {{ $order->address }}</li>
       <li><span class="font-semibold text-[#1B3C53]">WhatsApp Number:</span> {{ $order->phone }}</li>
-      <li><span class="font-semibold text-[#1B3C53]">Payment Method:</span> {{ $order->payment->payment_method ?? '—' }}</li>
-      <li><span class="font-semibold text-[#1B3C53]">Order ID:</span> {{ $order->id ?? '-' }}</li>
+      <li><span class="font-semibold text-[#1B3C53]">Payment Method:</span> {{ strtoupper($order->payment->payment_method ?? '-') }}</li>
+      <li><span class="font-semibold text-[#1B3C53]">Order ID:</span> {{ $order->id }}</li>
     </ul>
   </div>
 
-  {{-- ✅ Action Buttons --}}
+  {{-- ✅ Conditional Info --}}
+  @if (strtoupper($order->payment->payment_method ?? '') === 'COD')
+    {{-- COD Info --}}
+    <div class="max-w-md bg-blue-50 border border-blue-200 text-blue-800 text-sm px-5 py-4 rounded-lg shadow-sm mb-8 text-left">
+      <p class="font-semibold mb-1">🚚 Your order is being processed!</p>
+      <p class="leading-relaxed">
+        Please prepare the payment in cash when your package arrives. Our courier will deliver your books shortly. 
+        You can monitor the delivery status in <span class="font-medium text-[#1B3C53]">My Orders</span>.
+      </p>
+    </div>
+  @else
+    {{-- Bank Transfer Info --}}
+    <div class="max-w-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm px-5 py-4 rounded-lg shadow-sm mb-8 text-left">
+      <p class="font-semibold mb-1">💳 Complete Your Payment</p>
+      <p class="leading-relaxed mb-3">
+        Please transfer your payment to one of the following accounts and upload the payment proof via <span class="font-medium text-[#1B3C53]">My Orders</span>.
+      </p>
+      <ul class="list-disc pl-5 space-y-1 text-xs sm:text-sm">
+        <li><span class="font-medium">BCA:</span> 1234567890 — PT Litera Market Indonesia</li>
+        <li><span class="font-medium">Mandiri:</span> 9876543210 — PT Litera Market Indonesia</li>
+        <li><span class="font-medium">BNI:</span> 5678901234 — PT Litera Market Indonesia</li>
+      </ul>
+      <p class="mt-3 text-xs italic text-yellow-700">
+        ⚠️ Please complete your payment within 24 hours to avoid automatic cancellation.
+      </p>
+    </div>
+  @endif
+
+  {{-- ✅ Buttons --}}
   <div class="flex flex-wrap justify-center gap-4 mb-8">
     <a href="{{ route('home') }}" 
       class="px-5 py-2 bg-[#1B3C53] text-white rounded-md hover:bg-[#163246] transition text-sm font-medium">
       ← Back to Homepage
     </a>
-
     <a href="{{ route('user.orders.index') }}" 
       class="px-5 py-2 border border-[#1B3C53] text-[#1B3C53] rounded-md hover:bg-[#1B3C53] hover:text-white transition text-sm font-medium">
       🧾 My Orders
     </a>
   </div>
-
-  {{-- ✅ Next Step Instruction --}}
-  <div class="max-w-md bg-blue-50 border border-blue-200 text-blue-800 text-sm px-5 py-4 rounded-lg shadow-sm flex items-start gap-3">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mt-0.5 text-blue-600">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m4 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-    <p class="text-left leading-relaxed">
-      <span class="font-semibold">Next step:</span> Please visit <span class="font-semibold text-[#1B3C53]">My Orders</span> to upload your <span class="font-medium">payment proof</span> and confirm your transaction.  
-      Your order will be verified by our team within 24 hours after uploading.
-    </p>
-  </div>
-
 </div>
 @endsection

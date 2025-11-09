@@ -4,25 +4,25 @@
 
 @section('content')
   <div class="max-w-6xl mx-auto py-10 px-4" x-data="{
-                    tab: new URLSearchParams(window.location.search).get('tab') || 'All', 
-                    modal: null, 
-                    orderId: null,
-                    orderItemId: null,
-                    reviewMode: 'create',
-                    reviewId: null,
-                    setTab(status) {
-                      this.tab = status;
-                      const url = new URL(window.location.href);
-                      url.searchParams.set('tab', status);
-                      window.history.pushState({}, '', url);
-                    }
-                  }" x-init="
-                    $watch('tab', value => {
-                      const url = new URL(window.location.href);
-                      url.searchParams.set('tab', value);
-                      window.history.replaceState({}, '', url);
-                    });
-                  ">
+                      tab: new URLSearchParams(window.location.search).get('tab') || 'All', 
+                      modal: null, 
+                      orderId: null,
+                      orderItemId: null,
+                      reviewMode: 'create',
+                      reviewId: null,
+                      setTab(status) {
+                        this.tab = status;
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('tab', status);
+                        window.history.pushState({}, '', url);
+                      }
+                    }" x-init="
+                      $watch('tab', value => {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('tab', value);
+                        window.history.replaceState({}, '', url);
+                      });
+                    ">
 
     <h1
       class="text-2xl font-bold text-[#1B3C53] mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -36,12 +36,36 @@
         ← <span>Back to Homepage</span>
       </a>
     </h1>
+    {{-- 💳 Universal Bank Transfer Info --}}
+    <div class="mb-8 bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-lg shadow-sm p-5 text-sm text-[#1B3C53]">
+      <div class="flex items-start gap-3">
+        <div class="text-[13px]">💳</div>
+        <div>
+          <h2 class="font-semibold text-[#1B3C53] mb-1">Bank Transfer Information</h2>
+          <p class="text-[13px] leading-relaxed text-gray-700 mb-3">
+            If you selected <span class="font-medium text-[#1B3C53]">Bank Transfer</span> as your payment method,
+            please make your payment to one of the accounts below and upload the payment proof in your order details.
+          </p>
+          <ul class="list-disc pl-5 space-y-1 text-[13px]">
+            <li><span class="font-medium">Bank BCA:</span> 1234567890 | <span class="italic">a.n. PT Litera Market
+                Indonesia</span></li>
+            <li><span class="font-medium">Bank Mandiri:</span> 9876543210 | <span class="italic">a.n. PT Litera Market
+                Indonesia</span></li>
+            <li><span class="font-medium">Bank BNI:</span> 5678901234 | <span class="italic">a.n. PT Litera Market
+                Indonesia</span></li>
+          </ul>
+          <p class="mt-3 text-xs text-gray-600 italic">
+            ⚠️ Please complete your payment within 24 hours to avoid automatic cancellation.
+          </p>
+        </div>
+      </div>
+    </div>
 
     {{-- === Notification Toast (Consistent with Cart Modal) === --}}
     @if (session('success') || session('error'))
       <div x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 3000)" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md
-                           rounded-xl shadow-xl border border-[#d2c1b6]/70 bg-[#F9F3EF]
-                           text-[#1B3C53] text-sm font-medium px-5 py-4 flex justify-between items-center">
+                               rounded-xl shadow-xl border border-[#d2c1b6]/70 bg-[#F9F3EF]
+                               text-[#1B3C53] text-sm font-medium px-5 py-4 flex justify-between items-center">
         {{-- Message --}}
         <span>{{ session('success') ?? session('error') }}</span>
 
@@ -56,8 +80,8 @@
     <div class="flex flex-wrap gap-2 mb-6">
       @foreach (['All', 'Pending', 'Processed', 'Shipped', 'Delivered', 'Cancelled'] as $status)
         <button @click="setTab('{{ $status }}')" :class="tab === '{{ $status }}' 
-                                          ? 'bg-[#1B3C53] text-white' 
-                                          : 'bg-white text-[#1B3C53] border border-[#1B3C53]'"
+                                              ? 'bg-[#1B3C53] text-white' 
+                                              : 'bg-white text-[#1B3C53] border border-[#1B3C53]'"
           class="px-4 py-2 rounded-md font-medium text-sm transition-all">
           {{ $status }}
         </button>
@@ -147,13 +171,13 @@
     {{-- === Review Modal (Create / Edit) === --}}
     <div x-show="modal === 'review'" x-cloak class="fixed inset-0 flex items-center justify-center bg-black/40 z-50"
       x-data="{ currentRating: 0, currentComment: '', errorMessage: '' }" @open-review.window="
-      reviewMode = $event.detail.mode;
-      orderItemId = $event.detail.orderItemId ?? null;
-      reviewId = $event.detail.reviewId ?? null;
-      currentRating = Number($event.detail.rating ?? 0);
-      currentComment = $event.detail.comment ?? '';
-      errorMessage = '';
-    ">
+        reviewMode = $event.detail.mode;
+        orderItemId = $event.detail.orderItemId ?? null;
+        reviewId = $event.detail.reviewId ?? null;
+        currentRating = Number($event.detail.rating ?? 0);
+        currentComment = $event.detail.comment ?? '';
+        errorMessage = '';
+      ">
       <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
         <h3 class="text-lg font-semibold text-[#1B3C53] mb-4"
           x-text="reviewMode === 'create' ? 'Write a Review' : 'Edit Review'"></h3>
@@ -161,12 +185,12 @@
         <form method="POST"
           x-bind:action="reviewMode === 'create' ? `/user/reviews/${orderItemId}` : `/user/reviews/${reviewId}`"
           @submit.prevent="
-          if (currentRating === 0) {
-            errorMessage = 'Please give a rating before submitting your review.';
-            return;
-          }
-          $el.submit();
-        ">
+            if (currentRating === 0) {
+              errorMessage = 'Please give a rating before submitting your review.';
+              return;
+            }
+            $el.submit();
+          ">
           @csrf
           <template x-if="reviewMode === 'edit'">
             <input type="hidden" name="_method" value="PUT">

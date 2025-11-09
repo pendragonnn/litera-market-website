@@ -71,6 +71,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         ->name('orders.reject');
     Route::patch('/admin/orders/{order}/cancel', [\App\Http\Controllers\Admin\OrderController::class, 'cancel'])
         ->name('orders.cancel');
+    Route::post('/orders/{order}/ship-cod', [\App\Http\Controllers\Admin\OrderController::class, 'shipCOD'])
+        ->name('orders.shipCOD');
 
     // Reviews Monitoring
     Route::resource('/reviews', ReviewController::class)->only(['index', 'show']);
@@ -113,17 +115,29 @@ Route::prefix('guest')->name('guest.')->group(function () {
     // Guest Checkout
     Route::get('/checkout', [GuestCheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [GuestCheckoutController::class, 'store'])->name('checkout.store');
-    Route::get('/checkout/success/{token}', [GuestCheckoutController::class, 'success'])->name('checkout.success');
+    Route::get('/checkout/success/{id}/{key}', [GuestCheckoutController::class, 'success'])->name('checkout.success');
 
-    // Guest Order Tracker
-    Route::get('/order-tracker', [GuestOrderTrackerController::class, 'index'])->name('order.tracker.index');
-    Route::post('/order-tracker/find', [GuestOrderTrackerController::class, 'find'])->name('order.tracker.find');
-    Route::get('/order/{token}', [GuestOrderTrackerController::class, 'show'])->name('order.tracker.show');
-    Route::post('/order/{token}/upload-proof', [GuestOrderTrackerController::class, 'uploadProof'])->name('order.tracker.upload');
-    Route::patch('/order/{token}/cancel', [GuestOrderTrackerController::class, 'cancel'])->name('order.tracker.cancel');
-    Route::patch('/order/{token}/complete', [GuestOrderTrackerController::class, 'complete'])->name('order.tracker.complete');
-    Route::post('/order-tracker/find-token', [GuestOrderTrackerController::class, 'findToken'])
-        ->name('order.tracker.findToken');
+
+    // === Guest Order Tracker (secure hashed access) ===
+    Route::prefix('order-tracker')->name('order.tracker.')->group(function () {
+        // Halaman awal tracker (form input ID + phone)
+        Route::get('/', [GuestOrderTrackerController::class, 'index'])->name('index');
+
+        // Form submit untuk cari order → redirect ke detail dengan hash
+        Route::post('/find', [GuestOrderTrackerController::class, 'find'])->name('find');
+
+        // ✅ Show order detail — sekarang pakai ID dan hash key di URL
+        Route::get('/{id}/{key}', [GuestOrderTrackerController::class, 'show'])->name('show');
+
+        // ✅ Upload payment proof (pakai ID dan hash key juga)
+        Route::post('/{id}/{key}/upload-proof', [GuestOrderTrackerController::class, 'uploadProof'])->name('upload');
+
+        // ✅ Cancel order (pakai ID dan hash key juga)
+        Route::patch('/{id}/{key}/cancel', [GuestOrderTrackerController::class, 'cancel'])->name('cancel');
+
+        // ✅ Mark as complete (pakai ID dan hash key juga)
+        Route::patch('/{id}/{key}/complete', [GuestOrderTrackerController::class, 'complete'])->name('complete');
+    });
 });
 
 Route::middleware('auth:sanctum')->get('/cart/count', function (Request $request) {

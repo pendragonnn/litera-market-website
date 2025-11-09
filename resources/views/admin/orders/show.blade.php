@@ -131,6 +131,24 @@
     </div>
   @endif
 
+  {{-- Admin Action for COD Orders --}}
+  @if (
+      $order->payment && 
+      strtoupper($order->payment->payment_method) === 'COD' && 
+      $order->status === 'Processed'
+  )
+    <div class="flex justify-end flex-wrap gap-3">
+      <form action="{{ route('admin.orders.shipCOD', $order) }}" method="POST" 
+            onsubmit="return confirm('Are you sure you want to mark this COD order as shipped?');">
+        @csrf
+        <button type="submit"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium">
+          Mark as Shipped (COD)
+        </button>
+      </form>
+    </div>
+  @endif
+
   {{-- === Cancel Modal === --}}
   <div id="cancelModal" class="fixed inset-0 z-50 hidden bg-black/40 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-sm relative overflow-hidden border border-gray-300">

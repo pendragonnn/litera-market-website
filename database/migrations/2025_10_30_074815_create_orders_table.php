@@ -16,7 +16,6 @@ return new class extends Migration {
                 ->nullable()
                 ->constrained('users')
                 ->onDelete('set null');
-            $table->uuid('token_order')->nullable()->unique();
             $table->string('name', 100);
             $table->string('phone', 20)->nullable();
             $table->text('address');

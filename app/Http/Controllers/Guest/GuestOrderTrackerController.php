@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Guest;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\Payment;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class GuestOrderTrackerController extends Controller
 {
@@ -19,53 +18,62 @@ class GuestOrderTrackerController extends Controller
     }
 
     /**
-     * Find order by token
+     * Find order by ID and phone number, redirect ke hashed secure URL
      */
     public function find(Request $request)
     {
-        $request->validate(['token_order' => 'required|string']);
-        $token = strtoupper(trim($request->token_order));
-
-        $order = Order::where('token_order', $token)->first();
-
-        if (!$order) {
-            return back()->with('error', 'Order not found. Please check your token.');
-        }
-
-        return redirect()->route('guest.order.tracker.show', ['token' => $token]);
-    }
-
-    /**
-     * Show guest order details
-     */
-    public function show($token)
-    {
-        $order = Order::where('token_order', $token)
-            ->with(['orderItems.book', 'payment'])
-            ->firstOrFail();
-
-        return view('guest.orders.tracker-show', compact('order'));
-    }
-
-    /**
-     * Upload payment proof
-     */
-    public function uploadProof(Request $request, $token)
-    {
         $request->validate([
-            'payment_proof' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'order_id' => 'required|numeric',
+            'phone' => 'required|string'
         ]);
 
-        $order = Order::where('token_order', $token)->with('payment')->firstOrFail();
-        $payment = $order->payment;
+        $order = Order::where('id', $request->order_id)
+            ->where('phone', $request->phone)
+            ->first();
 
-        if (!$payment) {
-            return back()->with('error', 'Payment record not found.');
+        if (!$order) {
+            return back()->with('error', 'Order not found. Please check your Order ID and phone number.');
         }
+
+        $key = hash('sha256', $order->id . '|' . $order->phone . config('app.key'));
+
+        return redirect()->route('guest.order.tracker.show', ['id' => $order->id, 'key' => $key]);
+    }
+
+    /**
+     * Show guest order details (secured by hashed key)
+     */
+    public function show($id, $key)
+    {
+        $order = Order::with(['orderItems.book', 'payment'])->findOrFail($id);
+        $validKey = hash('sha256', $order->id . '|' . $order->phone . config('app.key'));
+
+        if ($key !== $validKey) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        return view('guest.orders.tracker-show', compact('order', 'key'));
+    }
+
+    /**
+     * Upload payment proof (secured)
+     */
+    public function uploadProof(Request $request, $id, $key)
+    {
+        $order = Order::with('payment')->findOrFail($id);
+        $validKey = hash('sha256', $order->id . '|' . $order->phone . config('app.key'));
+
+        if ($key !== $validKey) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $request->validate([
+            'payment_proof' => 'required|image|mimes:jpg,jpeg,png',
+        ]);
 
         $path = $request->file('payment_proof')->store('payments', 'public');
 
-        $payment->update([
+        $order->payment->update([
             'payment_proof' => $path,
             'payment_status' => 'Awaiting Approval',
         ]);
@@ -76,70 +84,54 @@ class GuestOrderTrackerController extends Controller
     }
 
     /**
-     * Cancel guest order
+     * Cancel guest order (secured)
      */
-    public function cancel($token)
+    public function cancel($id, $key)
     {
-        $order = Order::where('token_order', $token)
-            ->with(['payment', 'orderItems.book'])
-            ->firstOrFail();
+        $order = Order::with(['payment', 'orderItems.book'])->findOrFail($id);
+        $validKey = hash('sha256', $order->id . '|' . $order->phone . config('app.key'));
 
-        // Validasi status
+        if ($key !== $validKey) {
+            abort(403, 'Unauthorized access.');
+        }
+
         if (!in_array($order->status, ['Pending', 'Processed'])) {
             return back()->with('error', 'You can only cancel pending or processed orders.');
         }
 
-        // Kembalikan stok setiap buku di order
         foreach ($order->orderItems as $item) {
             if ($item->book) {
                 $item->book->increment('stock', $item->quantity);
             }
         }
 
-        // Update status order dan payment
         $order->update(['status' => 'Cancelled']);
+        // $order->payment->update(['payment_status' => 'Rejected']);
 
-        if ($order->payment) {
-            $order->payment->update(['payment_status' => 'Rejected']);
-        }
-
-        return back()->with('success', 'Order has been cancelled successfully, and item stock has been restored.');
+        return back()->with('success', 'Order has been cancelled successfully.');
     }
 
     /**
-     * Mark guest order as completed
+     * Mark as delivered (complete) (secured)
      */
-    public function complete($token)
+    public function complete($id, $key)
     {
-        $order = Order::where('token_order', $token)->firstOrFail();
+        $order = Order::with('payment')->findOrFail($id);
+        $validKey = hash('sha256', $order->id . '|' . $order->phone . config('app.key'));
+
+        if ($key !== $validKey) {
+            abort(403, 'Unauthorized access.');
+        }
 
         if ($order->status !== 'Shipped') {
             return back()->with('error', 'Only shipped orders can be marked as complete.');
         }
 
-        $order->update(['status' => 'Delivered']);
+        DB::transaction(function () use ($order) {
+            $order->update(['status' => 'Delivered']);
+            $order->payment->update(['payment_status' => 'Paid']);
+        });
 
         return back()->with('success', 'Order marked as delivered successfully.');
-    }
-
-    public function findToken(Request $request)
-    {
-        $request->validate([
-            'id_order' => 'required|string',
-            'phone' => 'required|string'
-        ]);
-
-        $order = Order::where('id', $request->id_order)
-            ->where('phone', $request->phone)
-            ->first();
-
-        if (!$order) {
-            return response()->json(['success' => false]);
-        }
-
-        return response()->json([
-            'success' => true,
-            'token_order' => $order->token_order
-        ]);
     }
 }

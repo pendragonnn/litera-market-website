@@ -3,6 +3,11 @@
 @section('title', 'Litera Market | Guest Success Order')
 
 @section('content')
+  @php
+    // 🔐 Generate secure key buat tombol "Track My Order"
+    $key = hash('sha256', $order->id . '|' . $order->phone . config('app.key'));
+  @endphp
+
   <div class="flex flex-col items-center justify-center min-h-[70vh] px-4 py-10 text-center">
 
     {{-- ✅ Success Icon --}}
@@ -14,42 +19,55 @@
       </svg>
     </div>
 
-    {{-- ✅ Title --}}
     <h1 class="text-2xl font-bold text-[#1B3C53] mb-2">Order Successful!</h1>
     <p class="text-gray-700 mb-1">
       Thank you for shopping at <span class="font-semibold text-[#1B3C53]">LiteraMarket</span>.
     </p>
     <p class="text-gray-600 mb-6">
-      Please save your order information below — you’ll need it to track your order or recover your token later.
+      Please save your order information below, you’ll need it to track your order later.
     </p>
 
     {{-- ✅ Order Summary --}}
     <div class="bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-lg shadow-sm p-6 text-left max-w-md w-full mb-8">
       <h2 class="font-semibold text-lg text-[#1B3C53] mb-3">Order Summary</h2>
       <ul class="text-gray-700 text-sm space-y-2">
+        <li><span class="font-semibold">Order ID:</span> #{{ $order->id }}</li>
         <li><span class="font-semibold">Name:</span> {{ $order->name }}</li>
         <li><span class="font-semibold">Address:</span> {{ $order->address }}</li>
         <li><span class="font-semibold">WhatsApp Number:</span> {{ $order->phone }}</li>
-        <li><span class="font-semibold">Order ID:</span> {{ $order->id }}</li>
-
-        <li>
-          <span class="font-semibold">Order Token:</span>
-          <div class="flex items-center gap-2 mt-1">
-            <span id="orderToken"
-              class="font-mono bg-yellow-100 border border-yellow-300 px-2 py-1 rounded text-[#1B3C53] select-all">
-              {{ $order->token_order }}
-            </span>
-
-            {{-- 🔘 Copy Button --}}
-            <button id="copyBtn" class="bg-[#1B3C53] text-white text-xs px-2 py-1 rounded hover:bg-[#163246] transition">
-              Copy
-            </button>
-          </div>
-          <p id="copyMsg" class="text-xs text-green-600 mt-1 hidden">✅ Token copied to clipboard!</p>
-          <p class="text-xs text-red-600 mt-1">⚠️ Keep this token and your Order ID safe! Both are required for order tracking or recovery.</p>
+        <li><span class="font-semibold">Payment Method:</span> {{ strtoupper($order->payment->payment_method ?? '-') }}
         </li>
       </ul>
     </div>
+
+    {{-- ✅ Conditional Info --}}
+    @if (strtoupper($order->payment->payment_method ?? '') === 'COD')
+      <div
+        class="max-w-md bg-blue-50 border border-blue-200 text-blue-800 text-sm px-5 py-4 rounded-lg shadow-sm mb-8 text-left">
+        <p class="font-semibold mb-1">🚚 Your order is being processed!</p>
+        <p class="leading-relaxed">
+          Please prepare the payment in cash when the courier arrives.
+          You can track the delivery status later using your secure tracking link below.
+        </p>
+      </div>
+    @else
+      <div
+        class="max-w-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm px-5 py-4 rounded-lg shadow-sm mb-8 text-left">
+        <p class="font-semibold mb-1">💳 Complete Your Payment</p>
+        <p class="leading-relaxed mb-3">
+          Please transfer the total amount to one of the bank accounts below and upload your payment proof via the Order
+          Tracker.
+        </p>
+        <ul class="list-disc pl-5 space-y-1 text-xs sm:text-sm">
+          <li><span class="font-medium">BCA:</span> 1234567890 — PT Litera Market Indonesia</li>
+          <li><span class="font-medium">Mandiri:</span> 9876543210 — PT Litera Market Indonesia</li>
+          <li><span class="font-medium">BNI:</span> 5678901234 — PT Litera Market Indonesia</li>
+        </ul>
+        <p class="mt-3 text-xs italic text-yellow-700">
+          ⚠️ Please complete your payment within 24 hours to avoid automatic cancellation.
+        </p>
+      </div>
+    @endif
 
     {{-- ✅ Action Buttons --}}
     <div class="flex flex-col sm:flex-row gap-3">
@@ -58,32 +76,11 @@
         ← Back to Homepage
       </a>
 
-      <a href="{{ route('guest.order.tracker.show', ['token' => $order->token_order]) }}"
+      {{-- 🔗 Secure Direct to Order Detail Page --}}
+      <a href="{{ route('guest.order.tracker.show', ['id' => $order->id, 'key' => $key]) }}"
         class="px-5 py-2 bg-[#1B3C53] text-white rounded-md hover:bg-[#163246] transition text-sm font-medium">
         📦 Track My Order
       </a>
     </div>
   </div>
-
-  {{-- ✅ Copy Script --}}
-  @push('scripts')
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const copyBtn = document.getElementById('copyBtn');
-        const orderToken = document.getElementById('orderToken');
-        const copyMsg = document.getElementById('copyMsg');
-
-        copyBtn.addEventListener('click', async () => {
-          try {
-            await navigator.clipboard.writeText(orderToken.textContent.trim());
-            copyMsg.classList.remove('hidden');
-            copyMsg.classList.add('block');
-            setTimeout(() => copyMsg.classList.add('hidden'), 2000);
-          } catch (err) {
-            alert('Failed to copy token. Please copy it manually.');
-          }
-        });
-      });
-    </script>
-  @endpush
 @endsection

@@ -1,9 +1,15 @@
 <div class="border border-gray-200 rounded-lg p-4 bg-[#F9F3EF]/60 shadow-sm">
   <div class="flex justify-between items-center mb-3">
     <h3 class="font-semibold text-[#1B3C53] text-sm">Order #{{ $order->id }}</h3>
-    <span class="text-xs bg-[#1B3C53] text-white px-2 py-1 rounded-md">
-      {{ ucfirst($order->status) }}
-    </span>
+    <div class="flex items-center gap-2">
+      {{-- Badge COD --}}
+      @if ($order->payment && strtoupper($order->payment->payment_method) === 'COD')
+        <span class="text-[10px] bg-yellow-600 text-white px-2 py-1 rounded-md font-semibold uppercase">COD</span>
+      @endif
+      <span class="text-xs bg-[#1B3C53] text-white px-2 py-1 rounded-md">
+        {{ ucfirst($order->status) }}
+      </span>
+    </div>
   </div>
 
   {{-- === Order Items === --}}
@@ -37,11 +43,11 @@
                 <div class="flex gap-2">
                   {{-- Edit Review --}}
                   <button @click="$dispatch('open-review', { 
-                                              mode:'edit', 
-                                              reviewId: {{ $item->review->id }}, 
-                                              rating: {{ $item->review->rating }}, 
-                                              comment: @js($item->review->comment) 
-                                            }); modal='review';"
+                                                          mode:'edit', 
+                                                          reviewId: {{ $item->review->id }}, 
+                                                          rating: {{ $item->review->rating }}, 
+                                                          comment: @js($item->review->comment) 
+                                                        }); modal='review';"
                     class="px-3 py-1 text-xs bg-[#1B3C53] text-white rounded hover:bg-[#163246]">
                     Edit
                   </button>
@@ -56,11 +62,11 @@
             @else
               {{-- Belum ada review --}}
               <button @click="$dispatch('open-review', { 
-                                          mode:'create', 
-                                          orderItemId: {{ $item->id }}, 
-                                          rating: 0, 
-                                          comment: '' 
-                                        }); modal='review';"
+                                                      mode:'create', 
+                                                      orderItemId: {{ $item->id }}, 
+                                                      rating: 0, 
+                                                      comment: '' 
+                                                    }); modal='review';"
                 class="mt-2 px-3 py-1 text-xs bg-[#1B3C53] text-white rounded hover:bg-[#163246]">
                 Write Review
               </button>
@@ -93,18 +99,14 @@
       {{-- === Processed Actions === --}}
       @if ($order->status === 'Processed')
         <div class="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-start">
-          {{-- Contact Admin via WhatsApp --}}
           @php
             $adminNumber = '6281234567890';
-            $waMessage = urlencode("Halo admin, saya ingin menanyakan status pembayaran untuk pesanan dengan ID #{$order->id} atas nama {$order->name}. Mohon dicek kembali bukti pembayaran saya. Terima kasih 🙏");
+            $waMessage = urlencode("Halo admin, saya ingin menanyakan status pembayaran untuk pesanan dengan ID #{$order->id} atas nama {$order->name}.");
           @endphp
-
           <a href="https://wa.me/{{ $adminNumber }}?text={{ $waMessage }}" target="_blank"
             class="inline-flex items-center gap-1 px-3 py-1 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 transition">
             Contact Admin
           </a>
-
-          {{-- Cancel Order --}}
           <button @click="modal = 'cancel'; orderId = {{ $order->id }}"
             class="px-3 py-1 text-xs bg-red-600 text-white rounded-md hover:bg-red-700 transition">
             Cancel
@@ -124,12 +126,23 @@
   </div>
 
   @if ($order->status === 'Processed')
-    {{-- Info for user --}}
-    <div
-      class="mt-3 bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs rounded-md px-4 py-3 leading-relaxed shadow-sm">
-      ⚠️ <span class="font-medium">Note:</span> If your payment proof hasn't been verified within <span
-        class="font-semibold text-[#1B3C53]">24 hours</span>,
-      please contact our admin through WhatsApp for faster confirmation.
-    </div>
+    {{-- === Info for user === --}}
+  @if ($order->status === 'Processed')
+    @if ($order->payment && strtoupper($order->payment->payment_method) === 'COD')
+      {{-- COD INFO --}}
+      <div
+        class="mt-3 bg-blue-50 border border-blue-200 text-blue-800 text-xs rounded-md px-4 py-3 leading-relaxed shadow-sm">
+        💡 <span class="font-medium">Info:</span> Your order is being processed and will be shipped soon. Please prepare the payment in cash when the courier arrives.
+      </div>
+    @else
+      {{-- BANK TRANSFER INFO --}}
+      <div
+        class="mt-3 bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs rounded-md px-4 py-3 leading-relaxed shadow-sm">
+        ⚠️ <span class="font-medium">Note:</span> If your payment proof hasn't been verified within
+        <span class="font-semibold text-[#1B3C53]">24 hours</span>,
+        please contact our admin through WhatsApp for faster confirmation.
+      </div>
+    @endif
+  @endif
   @endif
 </div>
