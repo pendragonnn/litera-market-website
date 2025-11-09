@@ -71,6 +71,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         ->name('orders.reject');
     Route::patch('/admin/orders/{order}/cancel', [\App\Http\Controllers\Admin\OrderController::class, 'cancel'])
         ->name('orders.cancel');
+    Route::post('/orders/{order}/ship-cod', [\App\Http\Controllers\Admin\OrderController::class, 'shipCOD'])
+        ->name('orders.shipCOD');
 
     // Reviews Monitoring
     Route::resource('/reviews', ReviewController::class)->only(['index', 'show']);

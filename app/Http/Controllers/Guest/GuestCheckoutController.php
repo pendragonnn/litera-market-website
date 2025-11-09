@@ -39,10 +39,12 @@ class GuestCheckoutController extends Controller
 
     DB::beginTransaction();
     try {
-      // Generate token unik untuk guest order
       $token = strtoupper(Str::random(10));
+      $isCOD = strtolower($validated['payment_method']) === 'cod';
+      $orderStatus = $isCOD ? 'Processed' : 'Pending';
+      $paymentStatus = $isCOD ? 'Unpaid' : 'Unpaid';
 
-      // Buat order utama
+      // Buat Order
       $order = Order::create([
         'user_id' => null,
         'token_order' => $token,
@@ -50,16 +52,13 @@ class GuestCheckoutController extends Controller
         'phone' => $validated['phone'],
         'address' => $validated['address'],
         'total_price' => 0,
-        'status' => 'Pending',
+        'status' => $orderStatus,
       ]);
 
       $total = 0;
 
-      // Simpan semua item dari cart dan kurangi stok
       foreach ($validated['cart'] as $item) {
         $book = Book::findOrFail($item['book_id']);
-
-        // Cek stok buku cukup atau tidak
         if ($book->stock < $item['quantity']) {
           throw new \Exception("Insufficient stock for {$book->title}");
         }
@@ -67,7 +66,6 @@ class GuestCheckoutController extends Controller
         $subtotal = $book->price * $item['quantity'];
         $total += $subtotal;
 
-        // Tambahkan order item
         OrderItem::create([
           'order_id' => $order->id,
           'book_id' => $book->id,
@@ -76,18 +74,16 @@ class GuestCheckoutController extends Controller
           'subtotal' => $subtotal,
         ]);
 
-        // Kurangi stok buku
         $book->decrement('stock', $item['quantity']);
       }
 
-      // Update total harga di order
       $order->update(['total_price' => $total]);
 
-      // Tambahkan data payment dengan status default Awaiting Approval
+      // Payment COD
       Payment::create([
         'order_id' => $order->id,
-        'payment_method' => $validated['payment_method'],
-        'payment_status' => 'Unpaid',
+        'payment_method' => strtoupper($validated['payment_method']),
+        'payment_status' => $paymentStatus,
         'payment_proof' => null,
       ]);
 
@@ -97,6 +93,7 @@ class GuestCheckoutController extends Controller
         'success' => true,
         'redirect_url' => route('guest.checkout.success', $token),
       ]);
+
     } catch (\Exception $e) {
       DB::rollBack();
 

@@ -38,9 +38,9 @@ class CheckoutController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'           => 'required|string|max:255',
-            'address'        => 'required|string|max:500',
-            'phone'          => 'required|string|max:20',
+            'name' => 'required|string|max:255',
+            'address' => 'required|string|max:500',
+            'phone' => 'required|string|max:20',
             'payment_method' => 'required|string|max:100',
         ]);
 
@@ -49,10 +49,10 @@ class CheckoutController extends Controller
         try {
             $user = Auth::user();
 
-            // Update user info if empty or changed
+            // Update user info
             $user->update([
                 'address' => $validated['address'],
-                'phone'   => $validated['phone'],
+                'phone' => $validated['phone'],
             ]);
 
             $cartItems = CartItem::with('book')->where('user_id', $user->id)->get();
@@ -63,38 +63,43 @@ class CheckoutController extends Controller
 
             $totalPrice = $cartItems->sum(fn($item) => $item->book->price * $item->quantity);
 
-            // Create order
+            // === COD Handling ===
+            $isCOD = strtolower($validated['payment_method']) === 'cod';
+            $orderStatus = $isCOD ? 'Processed' : 'Pending';
+            $paymentStatus = $isCOD ? 'Unpaid' : 'Unpaid';
+
+            // Buat Order
             $order = Order::create([
-                'user_id'     => $user->id,
-                'name'        => $validated['name'],
-                'address'     => $validated['address'],
-                'phone'       => $validated['phone'],
+                'user_id' => $user->id,
+                'name' => $validated['name'],
+                'address' => $validated['address'],
+                'phone' => $validated['phone'],
                 'total_price' => $totalPrice,
-                'status'      => 'pending',
+                'status' => $orderStatus,
             ]);
 
-            // Create order items + reduce stock
+            // Buat Order Item + kurangi stok
             foreach ($cartItems as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'book_id'  => $item->book_id,
+                    'book_id' => $item->book_id,
                     'quantity' => $item->quantity,
-                    'price'    => $item->book->price,
+                    'price' => $item->book->price,
                     'subtotal' => $item->book->price * $item->quantity,
                 ]);
 
                 $item->book->decrement('stock', $item->quantity);
             }
 
-            // Create payment
+            // Buat Payment Record
             Payment::create([
-                'order_id'        => $order->id,
-                'payment_method'  => $validated['payment_method'],
-                'payment_status'  => 'Unpaid',
-                'payment_proof'   => null,
+                'order_id' => $order->id,
+                'payment_method' => strtoupper($validated['payment_method']),
+                'payment_status' => $paymentStatus, // tetap unpaid dulu
+                'payment_proof' => null,
             ]);
 
-            // Clear cart
+            // Hapus Cart
             CartItem::where('user_id', $user->id)->delete();
 
             DB::commit();

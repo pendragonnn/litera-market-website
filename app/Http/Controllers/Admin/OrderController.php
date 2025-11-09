@@ -38,6 +38,35 @@ class OrderController extends Controller
     }
 
     /**
+     * Mark COD order as shipped (admin action).
+     */
+    public function shipCOD(Order $order)
+    {
+        // Pastikan ini order COD
+        if (!$order->payment || strtoupper($order->payment->payment_method) !== 'COD') {
+            return redirect()
+                ->route('admin.orders.index')
+                ->with('error', 'This order is not a COD order.');
+        }
+
+        // Pastikan statusnya masih Processed sebelum dikirim
+        if ($order->status !== 'Processed') {
+            return redirect()
+                ->route('admin.orders.index')
+                ->with('error', 'Only processed COD orders can be marked as shipped.');
+        }
+
+        DB::transaction(function () use ($order) {
+            // Update order jadi shipped tanpa ubah status pembayaran
+            $order->update(['status' => 'Shipped']);
+        });
+
+        return redirect()
+            ->route('admin.orders.index')
+            ->with('success', 'COD order has been marked as shipped successfully.');
+    }
+
+    /**
      * Confirm an order (admin action).
      */
     public function confirm(Order $order)

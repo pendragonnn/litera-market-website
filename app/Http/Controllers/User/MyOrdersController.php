@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class MyOrdersController extends Controller
@@ -80,10 +81,18 @@ class MyOrdersController extends Controller
             return back()->with('error', 'Only shipped orders can be marked as complete.');
         }
 
-        $order->update(['status' => 'Delivered']);
+        DB::transaction(function () use ($order) {
+            $order->update(['status' => 'Delivered']);
+
+            // Jika ada data payment, ubah jadi paid
+            if ($order->payment) {
+                $order->payment->update(['payment_status' => 'Paid']);
+            }
+        });
 
         return back()->with('success', 'Order marked as delivered successfully.');
     }
+
 
     /**
      * Store uploaded payment proof
