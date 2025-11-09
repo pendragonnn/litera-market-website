@@ -28,7 +28,8 @@
                 class="bg-[#002D72] text-white text-xs sm:text-sm font-medium px-3 py-1.5 rounded-md hover:bg-[#001E4D] transition"
                 data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-author="{{ $book->author }}"
                 data-description="{{ $book->description }}" data-price="{{ $book->price ?? 0 }}"
-                data-stock="{{ $book->stock }}" data-image="{{ $book->image ?? asset('images/default-book.jpg') }}"
+                data-stock="{{ $book->stock }}"
+                data-image="{{ $book->image ? asset($book->image) : asset('images/default-book.jpg') }}"
                 onclick="openBookModal(this)">
                 detail
               </button>
@@ -38,11 +39,12 @@
                 <button
                   class="add-to-cart bg-[#2E7D32] text-white text-xs sm:text-sm font-medium px-3 py-1.5 rounded-md hover:bg-[#1B5E20] transition"
                   data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-price="{{ $book->price ?? 0 }}"
-                  data-stock="{{ $book->stock }}" data-image="{{ $book->image ?? asset('images/default-book.jpg') }}">
+                  data-stock="{{ $book->stock }}"
+                  data-image="{{ $book->image ? asset($book->image) : asset('images/default-book.jpg') }}">
                   🛒
                 </button>
               @else
-                <span class="italic text-red-600 text-xs px-2 py-1 rounded-md font-medium whitespace-nowrap">
+                <span class="italic text-red-600 text-xs px-2 pt-2 rounded-md font-medium whitespace-nowrap">
                   Out of Stock
                 </span>
               @endif
@@ -83,7 +85,7 @@
 
 {{-- === Book Detail Modal === --}}
 <div id="bookModal"
-  class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 transition-all duration-300 ease-out">
+  class="fixed inset-0 bg-black/40 hidden items-center justify-center z-40 transition-all duration-300 ease-out">
   <div
     class="bg-white rounded-2xl shadow-2xl w-[92%] sm:w-[85%] lg:w-[70%] max-w-4xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300"
     id="bookModalBox">
@@ -125,7 +127,7 @@
         {{-- Buttons --}}
         <div class="flex flex-wrap gap-3">
           <button id="modalAddToCart"
-            class="bg-[#1B3C53] text-white text-sm sm:text-base font-medium px-4 sm:px-6 py-2 sm:py-2.5 rounded-md hover:bg-[#102a3e] transition">
+            class=" bg-[#2E7D32] text-white text-xs sm:text-sm font-medium px-3 py-1.5 rounded-md hover:bg-[#1B5E20] transition">
             🛒 Add to Cart
           </button>
         </div>
@@ -254,12 +256,48 @@
         }
       }
 
+      async function handleModalCartAction(bookId, title, button) {
+        await addToUserCart(bookId, title, button);
+      }
+
       /* === Book Modal === */
       function openBookModal(button) {
         const modal = document.getElementById('bookModal');
         const modalBox = document.getElementById('bookModalBox');
         const addToCartBtn = document.getElementById('modalAddToCart');
         const outOfStockMsg = document.getElementById('modalOutOfStock');
+
+        addToCartBtn.onclick = function () {
+          const btn = this;
+          const bookId = Number(button.dataset.bookId);
+          const title = button.dataset.title;
+          const price = Number(button.dataset.price);
+          const image = button.dataset.image;
+          const stock = Number(button.dataset.stock);
+
+          if (!isLoggedIn) {
+            const cart = JSON.parse(localStorage.getItem('guest_cart') || '[]');
+            const existing = cart.find(i => i.book_id === bookId);
+
+            if (existing) {
+              if (existing.quantity < stock) {
+                existing.quantity += 1;
+                showAlert(`"${title}" added to your cart!`, 'success');
+              } else {
+                showAlert(`"${title}" is at maximum stock.`, 'error');
+              }
+            } else {
+              cart.push({ book_id: bookId, title, price, quantity: 1, image, stock });
+              showAlert(`"${title}" added to your cart!`, 'success');
+            }
+
+            localStorage.setItem('guest_cart', JSON.stringify(cart));
+            const totalCount = cart.reduce((sum, i) => sum + i.quantity, 0);
+            window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: totalCount } }));
+          } else {
+            handleModalCartAction(bookId, title, btn);
+          }
+        };
 
         document.getElementById('modalBookTitle').textContent = button.dataset.title;
         document.getElementById('modalBookTitleText').textContent = button.dataset.title;
@@ -270,6 +308,12 @@
         document.getElementById('modalBookImage').src = button.dataset.image;
 
         const stock = parseInt(button.dataset.stock || 0);
+        const bookPrice = Number(button.dataset.price || 0);
+
+        document.getElementById('modalBookPrice').textContent = bookPrice.toLocaleString('id-ID', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        });
 
         if (stock <= 0) {
           addToCartBtn.disabled = true;
