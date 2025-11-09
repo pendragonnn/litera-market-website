@@ -1,53 +1,57 @@
 <section id="ourCollection" class="container mx-auto px-6 mb-16">
   <h3 class="text-center text-2xl font-bold text-[#1B3C53] mb-3">Our Collection</h3>
   <p class="text-center text-gray-600 mb-8">Find a wide selection of interesting books only at LiteraMarket.</p>
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-10">
     @forelse ($books as $book)
       <div
         class="border border-gray-300 bg-[#f9f9f9] flex flex-col items-center shadow-sm rounded-md hover:shadow-md transition-all">
-        <div class="w-full h-120 border-b border-gray-300 flex justify-center items-center bg-white rounded-t-md">
-          <img src="{{ $book->image
-      ? asset($book->image)
-      : 'https://placehold.co/200x250?text=No+Image' }}" alt="{{ $book->title }}" alt="{{ $book->title }}"
-            class="h-full object-contain">
+
+        {{-- Gambar Buku --}}
+        <div
+          class="w-full h-[280px] flex justify-center items-center bg-white border-b border-gray-300 overflow-hidden rounded-t-md">
+          <img src="{{ $book->image ? asset($book->image) : 'https://placehold.co/200x300?text=No+Image' }}"
+            alt="{{ $book->title }}"
+            class="w-[70%] h-full object-contain transition-transform duration-300 hover:scale-105">
         </div>
 
-        <div class="w-full px-3 py-3 flex flex-col justify-between flex-grow text-left">
+        {{-- Informasi Buku --}}
+        <div class="w-full p-4 flex flex-col justify-between flex-grow text-left bg-gray-50 border-t border-gray-200">
           <div>
-            <h4 class="text-sm font-bold text-gray-800 truncate">{{ $book->title }}</h4>
-            <p class="text-sm text-gray-600">{{ $book->author }}</p>
-            <span class="text-[#C0392B] font-semibold text-sm">
-              Rp {{ number_format($book->price ?? 51000, 0, ',', '.') }}
-            </span>
+            <h4 class="text-base font-bold text-gray-800 truncate">{{ $book->title }}</h4>
+            <p class="text-sm text-gray-600 mb-2">{{ $book->author }}</p>
           </div>
 
-          <div class="flex mt-3">
-            <div class="flex justify-between items-center gap-2 sm:gap-3 flex-wrap">
-              {{-- Detail Button --}}
+          <div class="mt-auto flex flex-col sm:flex-row justify-between items-center gap-2 border-t border-gray-200 pt-3">
+            <div class="flex gap-2">
+              {{-- Tombol Detail --}}
               <button
-                class="bg-[#002D72] text-white text-xs sm:text-sm md:text-base font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-[#001E4D] transition"
+                class="bg-[#002D72] text-white text-xs sm:text-sm font-medium px-3 py-1.5 rounded-md hover:bg-[#001E4D] transition"
                 data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-author="{{ $book->author }}"
                 data-description="{{ $book->description }}" data-price="{{ $book->price ?? 0 }}"
                 data-stock="{{ $book->stock }}" data-image="{{ $book->image ?? asset('images/default-book.jpg') }}"
                 onclick="openBookModal(this)">
-                Detail
+                detail
               </button>
 
-              {{-- Add to Cart Button (hidden if out of stock) --}}
+              {{-- Tombol Add to Cart --}}
               @if ($book->stock > 0)
                 <button
-                  class="add-to-cart bg-[#1B3C53] text-white text-xs sm:text-sm md:text-base font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-[#102a3e] transition"
+                  class="add-to-cart bg-[#2E7D32] text-white text-xs sm:text-sm font-medium px-3 py-1.5 rounded-md hover:bg-[#1B5E20] transition"
                   data-book-id="{{ $book->id }}" data-title="{{ $book->title }}" data-price="{{ $book->price ?? 0 }}"
                   data-stock="{{ $book->stock }}" data-image="{{ $book->image ?? asset('images/default-book.jpg') }}">
                   🛒
                 </button>
               @else
-                <span
-                  class="italic text-red-600 text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 py-1.5 rounded-md font-medium whitespace-nowrap">
+                <span class="italic text-red-600 text-xs px-2 py-1 rounded-md font-medium whitespace-nowrap">
                   Out of Stock
                 </span>
               @endif
             </div>
+
+            {{-- Harga --}}
+            <span class="text-[#C0392B] font-semibold text-sm sm:text-base whitespace-nowrap">
+              Rp {{ number_format($book->price ?? 0, 0, ',', '.') }}
+            </span>
           </div>
         </div>
       </div>

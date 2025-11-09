@@ -30,7 +30,7 @@ class HomeController extends Controller
             });
         }
 
-        $books = $query->paginate(8)->appends($request->all());
+        $books = $query->paginate(9)->appends($request->all());
 
         return view('home', compact('books', 'categories'));
     }
