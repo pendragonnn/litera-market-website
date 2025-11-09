@@ -20,7 +20,7 @@
       Thank you for shopping at <span class="font-semibold text-[#1B3C53]">LiteraMarket</span>.
     </p>
     <p class="text-gray-600 mb-6">
-      Please save your order information below — you’ll need it to track your order later.
+      Please save your order information below, you’ll need it to track your order later.
     </p>
 
     {{-- ✅ Order Summary --}}
@@ -44,7 +44,7 @@
         <p class="font-semibold mb-1">🚚 Your order is being processed!</p>
         <p class="leading-relaxed">
           Please prepare the payment in cash when the courier arrives at your address.
-          Our team will ship your order shortly — you can track the delivery status using your Order ID.
+          Our team will ship your order shortly you can track the delivery status using your Order ID.
         </p>
       </div>
     @else

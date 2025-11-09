@@ -28,7 +28,6 @@ class GuestCheckoutController extends Controller
   {
     $validated = $request->validate([
       'name' => 'required|string|max:100',
-      'email' => 'required|email|max:100',
       'phone' => 'required|string|max:20',
       'address' => 'required|string|max:255',
       'payment_method' => 'required|string|max:100',

@@ -118,7 +118,13 @@ class CheckoutController extends Controller
      */
     public function success(Order $order)
     {
+        // Pastikan order ini milik user yang sedang login
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized access to this order.');
+        }
+
         $order->load('payment');
+
         return view('user.checkout.success', compact('order'));
     }
 }
