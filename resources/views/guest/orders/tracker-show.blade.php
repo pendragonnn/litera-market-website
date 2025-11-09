@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Litera Market | Order Details')
+
 @section('content')
   <div class="max-w-3xl mx-auto py-10 px-4">
 

@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Litera Market | My Orders')
+
 @section('content')
   <div class="max-w-6xl mx-auto py-10 px-4" x-data="{
                     tab: new URLSearchParams(window.location.search).get('tab') || 'All', 

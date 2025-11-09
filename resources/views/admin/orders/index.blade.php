@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', 'Admin Panel | Orders')
+
 @section('breadcrumb', 'Orders Data Management')
 
 @section('content')

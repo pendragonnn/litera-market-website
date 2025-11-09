@@ -12,7 +12,7 @@
       <div class="border-b border-gray-200 pb-3 last:border-none">
         {{-- Item info --}}
         <div class="flex justify-between items-center">
-          <span class="font-medium text-[#1B3C53]">{{ $item->book->title }} × {{ $item->quantity }}</span>
+          <span class="font-medium text-[#1B3C53]">{{ $item->book->title ?? '' }} × {{ $item->quantity }}</span>
           <span>Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
         </div>
 

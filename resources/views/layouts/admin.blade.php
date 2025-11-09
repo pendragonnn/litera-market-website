@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel | LiteraMarket</title>
+  <title>@yield('title', 'Admin Panel')</title>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.css" />
 </head>
@@ -69,7 +69,6 @@
           class="block px-4 py-2 rounded-md hover:bg-[#163246] {{ request()->routeIs('admin.reviews.*') ? 'bg-[#163246]' : '' }}">
           Messages & Comments
         </a>
-        <a href="#" class="block px-4 py-2 rounded-md hover:bg-[#163246]">Settings</a>
       </nav>
 
       <div class="p-4 border-t border-white/20 text-xs text-center text-gray-300">

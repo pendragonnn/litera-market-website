@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', 'Admin Panel | Books')
+
 @section('breadcrumb', 'Books Data Management')
 
 @section('content')
