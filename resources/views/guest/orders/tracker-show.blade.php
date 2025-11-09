@@ -85,7 +85,7 @@
       @else
         @if ($order->payment)
         {{-- {{ dd($order->payment->payment_method) }} --}}
-          @if($order->payment->payment_method === "Transfer" && $order->payment->payment_status === "Unpaid")
+          @if($order->payment->payment_method === "Transfer" && $order->status !== "Cancelled" && ($order->payment->payment_status === "Unpaid" || $order->payment->payment_status === "Rejected"))
           {{-- 💳 Universal Bank Transfer Info --}}
           <div class="mb-8 bg-[#F9F3EF] border border-[#d2c1b6]/70 rounded-lg shadow-sm p-5 text-sm text-[#1B3C53]">
             <div class="flex items-start gap-3">
